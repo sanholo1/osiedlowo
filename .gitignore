@@ -5,6 +5,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
+pnpm-debug.log*
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
@@ -137,3 +138,65 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Project specific
+/backend/dist/
+/frontend/build/
+/frontend/dist/
+mysql_data/
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.azure/
+
+# Source maps
+*.map
+*.js.map
+*.css.map
+
+# Environment files
+.env.local
+.env.development
+.env.test
+.env.production
+.env*.local
+
+# IDE specific files
+.settings/
+.project
+.classpath
+*.sublime-workspace
+*.sublime-project
+.vs/
+*.code-workspace
+
+# TypeScript build artifacts
+/backend/**/*.js
+/backend/**/*.js.map
+/frontend/**/*.js
+/frontend/**/*.js.map
+!/frontend/public/*.js
+
+# Testing
+/coverage/
+/.nyc_output/
+/cypress/videos/
+/cypress/screenshots/
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+.temp/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

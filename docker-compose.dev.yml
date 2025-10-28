@@ -1,0 +1,25 @@
+services:
+  # Tylko MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: osiedlowo_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: osiedlowo_db
+      MYSQL_USER: osiedlowo_user
+      MYSQL_PASSWORD: osiedlowo_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - osiedlowo_network
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  osiedlowo_network:
+    driver: bridge

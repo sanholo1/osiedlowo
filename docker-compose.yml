@@ -1,0 +1,73 @@
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: osiedlowo_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: osiedlowo_db
+      MYSQL_USER: osiedlowo_user
+      MYSQL_PASSWORD: osiedlowo_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/init:/docker-entrypoint-initdb.d
+    networks:
+      - osiedlowo_network
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: osiedlowo_backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USERNAME: osiedlowo_user
+      DB_PASSWORD: osiedlowo_password
+      DB_DATABASE: osiedlowo_db
+      JWT_SECRET: your_jwt_secret_key_change_in_production
+      PORT: 3001
+    ports:
+      - "3001:3001"
+    depends_on:
+      - mysql
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    networks:
+      - osiedlowo_network
+    command: npm run dev
+
+  # Frontend React App
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: osiedlowo_frontend
+    restart: unless-stopped
+    environment:
+      REACT_APP_API_URL: http://localhost:3001
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - osiedlowo_network
+    command: npm start
+
+
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  osiedlowo_network:
+    driver: bridge
