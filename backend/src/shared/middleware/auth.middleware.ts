@@ -1,19 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
-import { AuthService } from '@modules/auth/auth.service';
+import jwt from 'jsonwebtoken';
 import { appConfig } from '@config/app.config';
 import { AppError } from '@shared/utils/app-error';
 
 export interface AuthenticatedRequest extends Request {
   user?: {
-    id: string;
+    userId: string;
     email: string;
-    firstName: string;
-    lastName: string;
     role: string;
   };
 }
-
-const authService = new AuthService();
 
 export const authMiddleware = async (
   req: AuthenticatedRequest,
@@ -21,47 +17,35 @@ export const authMiddleware = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    // Skip authentication if disabled in development
-    if (appConfig.disableAuth) {
-      // Create a mock user for development
-      req.user = {
-        id: 'dev-user-id',
-        email: 'dev@example.com',
-        firstName: 'Developer',
-        lastName: 'User',
-        role: 'admin',
-      };
-      return next();
-    }
-
     const token = extractTokenFromHeader(req);
 
     if (!token) {
-      throw new AppError('Access token is required', 401);
+      throw new AppError('Token autoryzacji jest wymagany', 401);
     }
 
-    // Verify token
-    const decoded = authService.verifyToken(token);
+    // Weryfikuj token
+    const decoded = jwt.verify(token, appConfig.jwt.secret) as {
+      userId: string;
+      email: string;
+      role: string;
+    };
 
-    // Get user from database
-    const user = await authService.getUserById(decoded.userId);
-
-    if (!user) {
-      throw new AppError('User not found or inactive', 401);
-    }
-
-    // Attach user to request
+    // Dołącz użytkownika do żądania
     req.user = {
-      id: user.id,
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      role: user.role,
+      userId: decoded.userId,
+      email: decoded.email,
+      role: decoded.role,
     };
 
     next();
   } catch (error) {
-    next(error);
+    if (error instanceof jwt.JsonWebTokenError) {
+      next(new AppError('Nieprawidłowy token', 401));
+    } else if (error instanceof jwt.TokenExpiredError) {
+      next(new AppError('Token wygasł', 401));
+    } else {
+      next(error);
+    }
   }
 };
 

@@ -1,0 +1,48 @@
+/* -----------------------------
+   Reset i style globalne
+   ----------------------------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* -----------------------------
+   Layout containers
+   
+   container - Główny kontener dla stron logowania/rejestracji
+   dashboard-container - Kontener dla widoku dashboard po zalogowaniu
+   ----------------------------- */
+
+/* -----------------------------
+   Komponenty formularza
+   
+   form-group - Grupa formularza (label + input)
+   form-label - Etykiety w formularzu
+   form-input - Pola wprowadzania danych
+   ----------------------------- */
+
+/* -----------------------------
+   Przyciski
+   
+   button - Podstawowy styl przycisku
+   button-primary - Główny przycisk akcji
+   button-secondary - Drugorzędny przycisk
+   button-danger - Przycisk usuwania/anulowania
+   button-success - Przycisk potwierdzenia/zapisu
+   button-group - Kontener grupujący przyciski
+   ----------------------------- */
+
+/* -----------------------------
+   Dashboard
+   
+   user-info - Panel z informacjami o zalogowanym użytkowniku
+   ----------------------------- */
+
+/* -----------------------------
+   Komunikaty
+   
+   message - Podstawowy styl komunikatu
+   message-success - Komunikat sukcesu
+   message-error - Komunikat błędu
+   ----------------------------- */

@@ -7,10 +7,11 @@ config();
 export const appConfig = {
   port: parseInt(process.env.PORT || '3001', 10),
   nodeEnv: process.env.NODE_ENV || 'development',
+  corsOrigin: process.env.CORS_ORIGIN || '*',
   
   database: {
     host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || '3306', 10),
+    port: parseInt(process.env.DB_PORT || '3307', 10),  // Changed to 3307 for host machine access
     username: process.env.DB_USERNAME || 'osiedlowo_user',
     password: process.env.DB_PASSWORD || 'osiedlowo_password',
     database: process.env.DB_DATABASE || 'osiedlowo_db',
