@@ -1,7 +1,6 @@
 import { config } from 'dotenv';
 import type { SignOptions } from 'jsonwebtoken';
 
-// Load environment variables
 config();
 
 export const appConfig = {
@@ -11,7 +10,7 @@ export const appConfig = {
   
   database: {
     host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || '3307', 10),  // Changed to 3307 for host machine access
+    port: parseInt(process.env.DB_PORT || '3307', 10),
     username: process.env.DB_USERNAME || 'osiedlowo_user',
     password: process.env.DB_PASSWORD || 'osiedlowo_password',
     database: process.env.DB_DATABASE || 'osiedlowo_db',

@@ -16,9 +16,6 @@ router.get('/health', (req, res) => {
 // Module routes
 router.use('/users', userRoutes);
 
-// TODO: Dodaj tutaj kolejne moduły
-// router.use('/properties', propertyRoutes);
-// router.use('/announcements', announcementRoutes);
-// router.use('/payments', paymentRoutes);
+
 
 export default router;

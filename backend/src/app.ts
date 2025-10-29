@@ -61,7 +61,6 @@ class App {
   }
 
   private initializeErrorHandling(): void {
-    // Global error handler - musi być ostatni!
     this.app.use(errorHandler);
   }
 
@@ -85,7 +84,6 @@ class App {
   }
 }
 
-// Initialize and start the application
 const application = new App();
 
 application

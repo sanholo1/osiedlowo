@@ -1,5 +1,4 @@
 services:
-  # MySQL Database
   mysql:
     image: mysql:8.0
     container_name: osiedlowo_mysql
@@ -17,7 +16,6 @@ services:
     networks:
       - osiedlowo_network
 
-  # Backend API
   backend:
     build:
       context: ./backend
@@ -44,7 +42,6 @@ services:
       - osiedlowo_network
     command: npm run dev
 
-  # Frontend React App
   frontend:
     build:
       context: ./frontend
