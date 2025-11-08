@@ -20,8 +20,12 @@
       "@/*": ["*"],
       "@config/*": ["config/*"],
       "@modules/*": ["modules/*"],
-      "@shared/*": ["shared/*"],
-      "@utils/*": ["utils/*"]
+      "@dtos": ["dtos"],
+      "@dtos/*": ["dtos/*"],
+      "@entities": ["entities"],
+      "@entities/*": ["entities/*"],
+      "@exceptions": ["exceptions"],
+      "@exceptions/*": ["exceptions/*"]
     }
   },
   "include": ["src/**/*"],

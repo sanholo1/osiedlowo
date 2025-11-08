@@ -1,9 +1,9 @@
 import React from 'react';
-import { AuthProvider } from './features/auth/context/AuthContext';
-import { useAuth } from './features/auth/context/AuthContext';
-import { Auth } from './features/auth/components/Auth';
-import { Dashboard } from './features/auth/components/Dashboard';
-import './styles/App.css';
+import { AuthProvider } from './contexts/AuthContext';
+import { useAuth } from './contexts/AuthContext';
+import { Auth } from './components/Auth';
+import { Dashboard } from './components/Dashboard';
+import './App.css';
 
 const AppContent: React.FC = () => {
   const { isLoggedIn } = useAuth();

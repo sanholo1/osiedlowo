@@ -5,7 +5,7 @@ import { config } from 'dotenv';
 import { AppDataSource } from '@config/database';
 import { appConfig } from '@config/app.config';
 import routes from './routes';
-import { errorHandler } from '@shared/middleware/error-handler';
+import { globalExceptionHandler } from './exceptions';
 
 // Załaduj zmienne środowiskowe
 config({ path: '../.env' });
@@ -61,7 +61,7 @@ class App {
   }
 
   private initializeErrorHandling(): void {
-    this.app.use(errorHandler);
+    this.app.use(globalExceptionHandler);
   }
 
   public async initializeDatabase(): Promise<void> {
