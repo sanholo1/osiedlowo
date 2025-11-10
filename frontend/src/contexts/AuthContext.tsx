@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { LoginForm, RegisterForm, User } from '../types/auth.types';
 import { authService } from '../services/auth.service';
 
