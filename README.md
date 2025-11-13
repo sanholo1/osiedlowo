@@ -35,3 +35,14 @@ docker compose up -d
 # Zobacz logi
 docker compose logs -f
 ```
+
+### Baza danych nie tworzy tabel?
+```bash
+# Usuń wszystko i zacznij od nowa
+docker compose down -v
+docker compose up -d
+
+# Sprawdź logi
+docker compose logs -f backend
+```
+

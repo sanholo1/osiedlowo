@@ -14,5 +14,6 @@ export const AppDataSource = new DataSource({
   logging: appConfig.nodeEnv === 'development',
   entities: [User],
   migrations: ['src/migrations/*.ts'],
+  migrationsRun: true, // Automatycznie uruchamia migracje przy starcie
   subscribers: ['src/subscribers/*.ts'],
 });
