@@ -29,57 +29,56 @@ export const RegisterPage: React.FC = () => {
     };
 
     return (
-        <div>
+        <div id='container-log-reg'>
             <h1>Osiedlowo</h1>
             <h2>Rejestracja</h2>
 
             <form onSubmit={handleSubmit}>
-                <div>
-                    <label>Email</label>
-                    <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        required
-                        disabled={isLoading}
-                    />
-                </div>
-
-                <div>
-                    <label>Hasło</label>
-                    <input
-                        type="password"
-                        name="password"
-                        value={formData.password}
-                        onChange={handleInputChange}
-                        required
-                        disabled={isLoading}
-                    />
-                </div>
-
-                <div>
-                    <label>Imię</label>
-                    <input
-                        type="text"
-                        name="firstName"
-                        value={formData.firstName}
-                        onChange={handleInputChange}
-                        required
-                        disabled={isLoading}
-                    />
-                </div>
-
-                <div>
-                    <label>Nazwisko</label>
-                    <input
-                        type="text"
-                        name="lastName"
-                        value={formData.lastName}
-                        onChange={handleInputChange}
-                        required
-                        disabled={isLoading}
-                    />
+                <div id="in-form">
+                    <div>
+                        <label>Email</label>
+                        <input
+                            type="email"
+                            name="email"
+                            value={formData.email}
+                            onChange={handleInputChange}
+                            required
+                            disabled={isLoading}
+                        />
+                    </div>
+                    <div>
+                        <label>Hasło</label>
+                        <input
+                            type="password"
+                            name="password"
+                            value={formData.password}
+                            onChange={handleInputChange}
+                            required
+                            disabled={isLoading}
+                        />
+                    </div>
+                    <div>
+                        <label>Imię</label>
+                        <input
+                            type="text"
+                            name="firstName"
+                            value={formData.firstName}
+                            onChange={handleInputChange}
+                            required
+                            disabled={isLoading}
+                        />
+                    </div>
+                    <div>
+                        <label>Nazwisko</label>
+                        <input
+                            type="text"
+                            name="lastName"
+                            value={formData.lastName}
+                            onChange={handleInputChange}
+                            required
+                            disabled={isLoading}
+                        />
+                    </div>
                 </div>
 
                 <button type="submit" disabled={isLoading}>

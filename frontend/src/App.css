@@ -1,0 +1,89 @@
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap');
+:root {
+    --white: #FFFFFF;
+    --white-blue: #BDD2FA;
+    --light-blue: #5E92F2;
+    --button-hovers: #5e92f281;
+    --blue: #1257D9;
+    --dark-blue: #0D2249;
+    --borders: 1px solid #e2e2e2;
+    --bradius: 10px;
+    --bshadow: 0 2px 2px 1px rgba(0, 0, 0, 0.6);
+    --gradient: linear-gradient(90deg, rgba(2, 0, 36, 1) 0%, rgba(9, 9, 121, 1) 35%, rgba(26, 168, 196, 1) 100%);
+    --button-padd: 10px 20px;
+}
+
+html {
+    font-family: 'Quicksand', sans-serif;
+}
+
+body {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #020024;
+    background: var(--gradient);
+    min-height: 100vh;
+}
+#container-log-reg {
+    border: var(--borders);
+    border-radius: var(--bradius);
+    background-color: var(--white);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    min-width: 768px;
+    min-height: 60vh;
+}
+
+#container-log-reg form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center
+}
+
+#container-log-reg form #in-form {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    min-width: 300px;
+    justify-content: center
+
+}
+
+#container-log-reg form * {
+    margin-top: 10px;
+}
+
+#container-log-reg form button {
+    background-color: var(--white-blue);
+    border-radius: var(--bradius);
+    padding: var(--button-padd);
+    box-shadow: var(--bshadow);
+    font-family: 'Quicksand', sans-serif;
+    font-weight: bold;
+    transition: 0.1s ease-in-out;
+}
+
+#container-log-reg form button:hover {
+    background-color: var(--button-hovers);
+}
+
+#container-log-reg form input {
+    margin-left: 10px;
+    background-color: var(--white-blue);
+    border-radius: var(--bradius);
+    padding: 10px;
+    box-shadow: var(--bshadow);
+    font-family: 'Quicksand', sans-serif;
+}
+
+#container-log-reg form label {
+    font-weight: bold;
+}
