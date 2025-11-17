@@ -3,7 +3,7 @@
     --white: #FFFFFF;
     --white-blue: #BDD2FA;
     --light-blue: #5E92F2;
-    --button-hovers: #5e92f281;
+    --button-hovers: #7092ce;
     --blue: #1257D9;
     --dark-blue: #0D2249;
     --borders: 1px solid #e2e2e2;
@@ -22,6 +22,7 @@ body {
     margin: 0;
     padding: 0;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     background: #020024;
@@ -51,27 +52,35 @@ body {
 #container-log-reg form #in-form {
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
-    min-width: 300px;
+    align-items: center;
+    min-width: 200px;
     justify-content: center
 
+}
+
+#container-log-reg form #in-form > div {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
 }
 
 #container-log-reg form * {
     margin-top: 10px;
 }
 
-#container-log-reg form button {
+button {
     background-color: var(--white-blue);
     border-radius: var(--bradius);
     padding: var(--button-padd);
     box-shadow: var(--bshadow);
     font-family: 'Quicksand', sans-serif;
     font-weight: bold;
-    transition: 0.1s ease-in-out;
+    transition: 0.2s ease-in-out;
 }
 
-#container-log-reg form button:hover {
+button:hover {
     background-color: var(--button-hovers);
 }
 
@@ -86,4 +95,66 @@ body {
 
 #container-log-reg form label {
     font-weight: bold;
+}
+
+#home-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    min-height: 100vh;
+}
+
+nav {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: center;
+    width: 100%;
+    background-color: var(--white);
+    border: var(--borders);
+    padding: 10px;
+}
+
+nav > div {
+    min-width: 200px;
+    text-align: center;
+}
+
+nav h1 {
+    margin: 0;
+}
+
+main {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+}
+
+main > * {
+    border: var(--borders);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    min-width: 300px;
+    width: 30%;
+    margin-bottom: 20px;
+    border-radius: var(--bradius);
+    background-color: var(--dark-blue);
+    box-shadow: var(--bshadow);
+    padding: 20px 10px;
+}
+
+#home-container main {
+    color: var(--white-blue);
+}
+
+#home-container h2 {
+    color: var(--white-blue);
+}
+
+#home-container p {
+    color: var(--white-blue);
 }
