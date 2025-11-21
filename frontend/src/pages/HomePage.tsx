@@ -29,34 +29,29 @@ export const HomePage: React.FC = () => {
             <main>
                 <div>
                     <h3>Profil użytkownika</h3>
-                    <p>Email: {user.email}</p>
-                    <p>Imię: {user.firstName}</p>
-                    <p>Nazwisko: {user.lastName}</p>
-                    <p>ID: {user.id}</p>
+                    <p className="profile-short-data">Email: {user.email}</p>
+                    <p className="profile-short-data">Imię: {user.firstName}</p>
+                    <p className="profile-short-data">Nazwisko: {user.lastName}</p>
+                    <p className="profile-short-data">ID: {user.id}</p>
+                    <button>Zarządzaj profilem</button>
                 </div>
 
                 <div>
-                    <h3>Moje Osiedle</h3>
-                    <p>Zarządzaj swoim osiedlem i komunikuj się z sąsiadami.</p>
-                    <button>Zobacz osiedle</button>
+                    <h3>Moje Osiedla</h3>
+                    <p>Zarządzaj swoimi osiedlami i komunikuj się z sąsiadami.</p>
+                    <button>Zobacz osiedla</button>
                 </div>
 
                 <div>
-                    <h3>Ogłoszenia</h3>
-                    <p>Sprawdź najnowsze ogłoszenia w Twoim osiedlu.</p>
-                    <button>Przeglądaj ogłoszenia</button>
+                    <h3>Przeglądaj Osiedla</h3>
+                    <p>Przeglądaj listę osiedli do których możesz dołączyć</p>
+                    <button>Przeglądaj osiedla</button>
                 </div>
 
                 <div>
-                    <h3>Wiadomości</h3>
-                    <p>Komunikuj się z mieszkańcami osiedla.</p>
-                    <button>Otwórz wiadomości</button>
-                </div>
-
-                <div>
-                    <h3>Wydarzenia</h3>
-                    <p>Zobacz nadchodzące wydarzenia i spotkania.</p>
-                    <button>Kalendarz wydarzeń</button>
+                    <h3>Stwórz Osiedle</h3>
+                    <p>Stwórz zupełnie nowe, własne osiedle</p>
+                    <button>Stwórz osiedle</button>
                 </div>
 
                 <div>

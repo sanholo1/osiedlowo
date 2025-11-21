@@ -6,6 +6,8 @@ import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { HomePage } from './pages/HomePage';
 import './App.css';
+import { RegulationsPage } from './pages/RegulationsPage';
+import { ProfilePage } from './pages/ProfilePage';
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -44,6 +46,14 @@ const App: React.FC = () => {
               </PublicRoute>
             }
           />
+          <Route
+            path="/regulations"
+            element={
+              <PublicRoute>
+                <RegulationsPage />
+              </PublicRoute>
+            }
+          />
           
           {/* Protected routes */}
           <Route
@@ -51,6 +61,14 @@ const App: React.FC = () => {
             element={
               <ProtectedRoute>
                 <HomePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
               </ProtectedRoute>
             }
           />

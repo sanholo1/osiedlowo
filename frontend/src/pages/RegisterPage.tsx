@@ -91,6 +91,9 @@ export const RegisterPage: React.FC = () => {
             <p>
                 Masz już konto? <Link to="/login">Zaloguj się</Link>
             </p>
+            <p>
+                <Link to="/regulations">Sprawdź nasz regulamin</Link>
+            </p>
         </div>
     );
 };

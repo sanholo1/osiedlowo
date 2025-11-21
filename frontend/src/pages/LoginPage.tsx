@@ -67,6 +67,9 @@ export const LoginPage: React.FC = () => {
             <p>
                 Nie masz konta? <Link to="/register">Zarejestruj się</Link>
             </p>
+            <p>
+                <Link to="/regulations">Sprawdź nasz regulamin</Link>
+            </p>
         </div>
     );
 };

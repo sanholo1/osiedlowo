@@ -11,6 +11,7 @@
     --bshadow: 0 2px 2px 1px rgba(0, 0, 0, 0.6);
     --gradient: linear-gradient(90deg, rgba(2, 0, 36, 1) 0%, rgba(9, 9, 121, 1) 35%, rgba(26, 168, 196, 1) 100%);
     --button-padd: 10px 20px;
+    overflow: hidden;
 }
 
 html {
@@ -29,6 +30,18 @@ body {
     background: var(--gradient);
     min-height: 100vh;
 }
+
+#container-log-reg a {
+    color: var(--blue);
+    text-decoration-line: none;
+}
+
+#container-log-reg a:hover {
+    color: var(--dark-blue);
+    text-decoration-line: underline;
+    text-decoration-color: var(--dark-blue);
+}
+
 #container-log-reg {
     border: var(--borders);
     border-radius: var(--bradius);
@@ -139,6 +152,7 @@ main > * {
     justify-content: space-evenly;
     align-items: center;
     min-width: 300px;
+    min-height: 288px;
     width: 30%;
     margin-bottom: 20px;
     border-radius: var(--bradius);
@@ -157,4 +171,8 @@ main > * {
 
 #home-container p {
     color: var(--white-blue);
+}
+
+.profile-short-data {
+    margin: 8px 0;
 }
