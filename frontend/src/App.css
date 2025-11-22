@@ -161,6 +161,7 @@ main > * {
     background-color: var(--dark-blue);
     box-shadow: var(--bshadow);
     padding: 20px 10px;
+    color: var(--white-blue);
 }
 
 .home-container main {
@@ -183,12 +184,18 @@ main > * {
     border-collapse: collapse;
     border: var(--borders);
     color: var(--white-blue);
-}
-
-.home-container table tr {
-    border: var(--borders);
+    background-color: var(--dark-blue);
 }
 
 .home-container table th {
     padding: 10px;
+}
+
+.home-container table tr {
+    border-bottom: var(--borders);
+}
+
+h1 {
+    text-align: center;
+    color: var(--white-blue);
 }

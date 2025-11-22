@@ -12,6 +12,7 @@ import { GroupCreatingPage } from './pages/GroupCreatingPage';
 import { UsersGroupsListPage } from './pages/UsersGroupsListPage';
 import { SearchForGroupPage } from './pages/SearchForGroupPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { GroupPage } from './pages/GroupPage';
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -105,6 +106,14 @@ const App: React.FC = () => {
             element={
               <ProtectedRoute>
                 <SettingsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/group"
+            element={
+              <ProtectedRoute>
+                <GroupPage />
               </ProtectedRoute>
             }
           />
