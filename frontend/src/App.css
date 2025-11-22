@@ -11,11 +11,11 @@
     --bshadow: 0 2px 2px 1px rgba(0, 0, 0, 0.6);
     --gradient: linear-gradient(90deg, rgba(2, 0, 36, 1) 0%, rgba(9, 9, 121, 1) 35%, rgba(26, 168, 196, 1) 100%);
     --button-padd: 10px 20px;
-    overflow: hidden;
 }
 
 html {
     font-family: 'Quicksand', sans-serif;
+    overflow-x: hidden;
 }
 
 body {
@@ -29,6 +29,7 @@ body {
     background: #020024;
     background: var(--gradient);
     min-height: 100vh;
+    overflow-x: hidden;
 }
 
 #container-log-reg a {
@@ -110,12 +111,13 @@ button:hover {
     font-weight: bold;
 }
 
-#home-container {
+.home-container {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
     min-height: 100vh;
+    width: 100%;
 }
 
 nav {
@@ -126,7 +128,7 @@ nav {
     width: 100%;
     background-color: var(--white);
     border: var(--borders);
-    padding: 10px;
+    padding: 20px;
 }
 
 nav > div {
@@ -161,18 +163,32 @@ main > * {
     padding: 20px 10px;
 }
 
-#home-container main {
+.home-container main {
     color: var(--white-blue);
 }
 
-#home-container h2 {
+.home-container h2 {
     color: var(--white-blue);
 }
 
-#home-container p {
+.home-container p {
     color: var(--white-blue);
 }
 
 .profile-short-data {
     margin: 8px 0;
+}
+
+.home-container table {
+    border-collapse: collapse;
+    border: var(--borders);
+    color: var(--white-blue);
+}
+
+.home-container table tr {
+    border: var(--borders);
+}
+
+.home-container table th {
+    padding: 10px;
 }

@@ -8,6 +8,10 @@ import { HomePage } from './pages/HomePage';
 import './App.css';
 import { RegulationsPage } from './pages/RegulationsPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { GroupCreatingPage } from './pages/GroupCreatingPage';
+import { UsersGroupsListPage } from './pages/UsersGroupsListPage';
+import { SearchForGroupPage } from './pages/SearchForGroupPage';
+import { SettingsPage } from './pages/SettingsPage';
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -69,6 +73,38 @@ const App: React.FC = () => {
             element={
               <ProtectedRoute>
                 <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/groupcreating"
+            element={
+              <ProtectedRoute>
+                <GroupCreatingPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/groupslist"
+            element={
+              <ProtectedRoute>
+                <UsersGroupsListPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/search"
+            element={
+              <ProtectedRoute>
+                <SearchForGroupPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <SettingsPage />
               </ProtectedRoute>
             }
           />
