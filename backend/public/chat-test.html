@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Czat - Osiedlowo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg-dark: #0f172a;
+            --bg-darker: #020617;
+            --bg-light: #1e293b;
+            --bg-lighter: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg-darker) 0%, var(--bg-dark) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px var(--shadow);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .nav-bar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            padding: 12px 24px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-light);
+            color: var(--text-primary);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-color: var(--primary-light);
+        }
+
+        .status-bar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .status-item {
+            flex: 1;
+            padding: 20px;
+            background: var(--bg-light);
+            border-radius: 15px;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .status-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            background: var(--bg-dark);
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: var(--bg-light);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            padding: 20px;
+            background: var(--bg-lighter);
+            font-weight: bold;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .panel-body {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            color: white;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .conversation-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .conversation-item {
+            padding: 15px;
+            background: var(--bg-dark);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .conversation-item:hover {
+            background: var(--bg-lighter);
+        }
+
+        .conversation-item.active {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .chat-messages {
+            height: 400px;
+            overflow-y: auto;
+            padding: 20px;
+            background: var(--bg-dark);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            padding: 12px 16px;
+            border-radius: 12px;
+            max-width: 80%;
+        }
+
+        .message-received {
+            background: var(--bg-lighter);
+            align-self: flex-start;
+            border-bottom-left-radius: 2px;
+        }
+
+        .message-sent {
+            background: var(--primary);
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+        }
+
+        .log-panel {
+            height: 150px;
+            overflow-y: auto;
+            background: var(--bg-dark);
+            padding: 10px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: #aaa;
+            border-radius: 10px;
+        }
+
+        .chat-interface {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💬 Czat Osiedlowo</h1>
+            <p>Rozmawiaj z sąsiadami w czasie rzeczywistym</p>
+        </div>
+
+        <div class="nav-bar">
+            <button class="nav-btn" onclick="window.location.href='neighborhoods.html'">
+                🏘️ Sąsiedztwa
+            </button>
+            <button class="nav-btn active">
+                💬 Czat
+            </button>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-item">
+                <div class="status-icon">🔌</div>
+                <div class="status-info">
+                    <h3>Status</h3>
+                    <p id="wsStatus" style="color: var(--danger)">Rozłączony</p>
+                </div>
+            </div>
+            <div class="status-item">
+                <div class="status-icon">👤</div>
+                <div class="status-info">
+                    <h3>Zalogowany jako</h3>
+                    <p id="currentUserDisplay">Weryfikacja...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <div class="panel">
+                <div class="panel-header">Kontakty i Konwersacje</div>
+                <div class="panel-body">
+
+                    <div id="conversationsSection" class="chat-interface">
+                        <button class="btn btn-primary" onclick="loadConversations()">🔄 Odśwież listę</button>
+                        <div id="conversationsList" class="conversation-list">
+                        </div>
+                        <div style="margin-top: 20px;">
+                            <label>Szukaj użytkownika:</label>
+                            <input type="text" id="searchUser" class="form-control" placeholder="Wpisz imię...">
+                            <button class="btn btn-success" onclick="searchUsers()">Szukaj</button>
+                            <div id="userSearchResults" style="margin-top: 10px;"></div>
+                        </div>
+                        <button class="btn btn-danger" style="margin-top: 30px;" onclick="logout()">Wyloguj</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <span id="currentChatName">Wybierz konwersację</span>
+                </div>
+                <div class="panel-body">
+                    <div id="chatMessages" class="chat-messages">
+                        <div style="text-align: center; color: var(--text-secondary); margin-top: 50px;">
+                            Wybierz czat z lewej strony, aby rozpocząć.
+                        </div>
+                    </div>
+                    <div class="input-group" style="display: flex; gap: 10px; margin-top: auto;">
+                        <input type="text" id="messageInput" class="form-control" style="margin-bottom: 0;"
+                            placeholder="Napisz wiadomość..." onkeypress="if(event.key === 'Enter') sendMessage()">
+                        <button class="btn btn-primary" style="width: auto; margin-bottom: 0;"
+                            onclick="sendMessage()">📤</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel" style="height: auto;">
+            <div class="panel-header">Logi</div>
+            <div id="logPanel" class="logPanel"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+        const API_URL = 'http://localhost:3001/api';
+        const WS_URL = 'http://localhost:3001';
+
+        let socket = null;
+
+        // POBIERANIE DANYCH Z PAMIĘCI
+        let authToken = localStorage.getItem('authToken');
+        let currentUserId = localStorage.getItem('currentUserId');
+        let currentUserEmail = localStorage.getItem('currentUserEmail'); // Nowe
+        let currentUserName = localStorage.getItem('currentUserName');   // Nowe
+
+        let currentConversationId = null;
+
+        // AUTOMATYCZNE LOGOWANIE PRZY STARCIE
+        if (authToken) {
+            checkAuth();
+        } else {
+            window.location.href = 'neighborhoods.html';
+        }
+
+        function log(msg) {
+            const p = document.getElementById('logPanel');
+            p.innerHTML += `<div>[${new Date().toLocaleTimeString()}] ${msg}</div>`;
+            p.scrollTop = p.scrollHeight;
+        }
+
+        // Pomocnicza funkcja do ładnego formatowania imienia
+        function formatUserDisplayName(user) {
+            if (!user) return 'Nieznany';
+
+            // Jeśli mamy imię i nazwisko
+            if (user.firstName && user.lastName) {
+                // Fix na sytuację "email email" (gdy w bazie imie=email i nazwisko=email)
+                if (user.firstName === user.lastName) return user.firstName;
+                return `${user.firstName} ${user.lastName}`;
+            }
+            // Fallback do imienia, username lub emaila
+            return user.firstName || user.username || user.email || 'Użytkownik';
+        }
+
+        // Zaktualizuj UI informacją o zalogowanym userze
+        function updateCurrentUserDisplay() {
+            const display = document.getElementById('currentUserDisplay');
+            if (currentUserName && currentUserName !== 'null') {
+                display.textContent = currentUserName;
+            } else if (currentUserEmail) {
+                display.textContent = currentUserEmail;
+            } else {
+                display.textContent = 'Zalogowany (ID: ' + currentUserId + ')';
+            }
+            display.style.color = 'var(--success)';
+        }
+
+        async function checkAuth() {
+            try {
+                // Weryfikacja tokena
+                const response = await fetch(`${API_URL}/chat/conversations`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                if (response.ok) {
+                    log('✅ Zalogowano pomyślnie');
+                    updateCurrentUserDisplay(); // Wyświetl dane z pamięci
+                    connectWebSocket();
+                    loadConversations();
+                } else {
+                    throw new Error('Token nieważny');
+                }
+            } catch (error) {
+                console.error(error);
+                log('⚠️ Sesja wygasła. Przekierowywanie...');
+                setTimeout(() => logout(), 1500);
+            }
+        }
+
+        async function login() {
+            // Ta funkcja jest wywoływana z neighborhoods.html, ale dodajemy ją tu 
+            // dla kompletności, gdybyś chciał dodać formularz logowania bezpośrednio w czacie.
+            // W tym pliku kluczowe jest to, co dzieje się w checkAuth.
+        }
+
+        function logout() {
+            localStorage.clear(); // Czyści wszystko: token, id, email, imię
+            authToken = null;
+            if (socket) socket.disconnect();
+            window.location.href = 'neighborhoods.html';
+        }
+
+        // --- Logika WebSockets ---
+
+        function connectWebSocket() {
+            if (!authToken) return;
+            socket = io(WS_URL, { auth: { token: authToken } });
+
+            socket.on('connect', () => {
+                document.getElementById('wsStatus').textContent = 'Połączony';
+                document.getElementById('wsStatus').style.color = 'var(--success)';
+                log('WebSocket połączony');
+            });
+
+            socket.on('new_message', (msg) => {
+                // Odśwież listę konwersacji, żeby pokazać nową wiadomość na górze/pogrubioną
+                loadConversations();
+
+                if (msg.conversationId === currentConversationId) {
+                    displayMessage(msg);
+                } else {
+                    log(`Nowa wiadomość od ${formatUserDisplayName(msg.sender)}`);
+                }
+            });
+        }
+
+        async function loadConversations() {
+            try {
+                const res = await fetch(`${API_URL}/chat/conversations`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const list = await res.json();
+                const container = document.getElementById('conversationsList');
+                container.innerHTML = '';
+
+                list.forEach(conv => {
+                    const div = document.createElement('div');
+                    div.className = 'conversation-item';
+                    if (currentConversationId === conv.id) div.classList.add('active');
+
+                    let name = conv.name;
+
+                    // Logika generowania nazwy dla czatów prywatnych
+                    if (!name && conv.participants) {
+                        // Filtrujemy Innych Uczestników. 
+                        // API zwraca płaską strukturę uczestników (bez zagnieżdżonego .user)
+                        const otherParticipants = conv.participants
+                            .filter(p => p.id != currentUserId)
+                            .map(p => formatUserDisplayName(p));
+
+                        if (otherParticipants.length > 0) {
+                            name = otherParticipants.join(', ');
+                        } else {
+                            name = 'Rozmowa prywatna';
+                        }
+                    }
+
+                    // Skracanie nazwy
+                    const displayName = name.length > 30 ? name.substring(0, 30) + '...' : name;
+
+                    div.innerHTML = `
+                        <div style="font-weight:600">${displayName}</div>
+                        <div style="font-size:0.8rem; color:var(--text-secondary)">
+                            ${conv.type === 'private' ? '👤 Prywatna' : '👥 Grupowa'}
+                        </div>
+                    `;
+
+                    div.onclick = () => {
+                        document.querySelectorAll('.conversation-item').forEach(el => el.classList.remove('active'));
+                        div.classList.add('active');
+                        selectConversation(conv.id, name);
+                    };
+
+                    container.appendChild(div);
+                });
+            } catch (error) {
+                log('Błąd ładowania listy: ' + error.message);
+            }
+        }
+
+        async function selectConversation(id, name) {
+            currentConversationId = id;
+            document.getElementById('currentChatName').textContent = name;
+            const chatBox = document.getElementById('chatMessages');
+            chatBox.innerHTML = '<div style="text-align:center; padding:20px">Ładowanie...</div>';
+
+            try {
+                const res = await fetch(`${API_URL}/chat/conversations/${id}/messages`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const messages = await res.json();
+                chatBox.innerHTML = ''; // Wyczyść loader
+
+                messages.forEach(displayMessage);
+
+                // Przewiń na dół po załadowaniu
+                chatBox.scrollTop = chatBox.scrollHeight;
+
+                socket.emit('join_conversation', { conversationId: id });
+            } catch (e) {
+                chatBox.innerHTML = '<div style="text-align:center; color:red">Błąd pobierania wiadomości</div>';
+            }
+        }
+
+        function displayMessage(msg) {
+            const div = document.createElement('div');
+            // Luźne porównanie ID (string vs number)
+            const isMe = msg.senderId == currentUserId;
+
+            div.className = isMe ? 'message message-sent' : 'message message-received';
+
+            const senderName = formatUserDisplayName(msg.sender);
+
+            div.innerHTML = `
+                <div style="font-size: 0.75rem; opacity: 0.8; margin-bottom: 2px;">
+                    ${isMe ? 'Ty' : senderName}
+                </div>
+                <div>${msg.content}</div>
+            `;
+
+            const chatBox = document.getElementById('chatMessages');
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const txt = input.value;
+            if (!txt || !currentConversationId) return;
+
+            socket.emit('send_message', {
+                conversationId: currentConversationId,
+                content: txt
+            });
+            input.value = '';
+        }
+
+        async function searchUsers() {
+            const q = document.getElementById('searchUser').value;
+            if (!q) return;
+
+            try {
+                const res = await fetch(`${API_URL}/chat/users/search?q=${q}`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const users = await res.json();
+                const div = document.getElementById('userSearchResults');
+                div.innerHTML = '';
+
+                if (users.length === 0) {
+                    div.innerHTML = '<div style="padding:10px; text-align:center; color:#888">Brak wyników</div>';
+                    return;
+                }
+
+                users.forEach(u => {
+                    const displayName = formatUserDisplayName(u);
+
+                    // Nie pokazuj samego siebie w wynikach
+                    if (u.id == currentUserId) return;
+
+                    div.innerHTML += `
+                        <div style="margin:5px 0; padding:10px; background:var(--bg-lighter); border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+                            <span>${displayName}</span>
+                            <button class="btn btn-primary" style="width:auto; margin:0; padding:5px 15px; font-size:0.85rem;" onclick="startChat('${u.id}')">
+                                Czat
+                            </button>
+                        </div>`;
+                });
+            } catch (e) {
+                log('Błąd wyszukiwania');
+            }
+        }
+
+        async function startChat(userId) {
+            try {
+                const res = await fetch(`${API_URL}/chat/conversations`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+                    body: JSON.stringify({ type: 'private', participantIds: [userId] })
+                });
+
+                if (res.ok) {
+                    loadConversations();
+                    document.getElementById('userSearchResults').innerHTML = '';
+                    document.getElementById('searchUser').value = '';
+                }
+            } catch (e) {
+                log('Błąd tworzenia czatu');
+            }
+        }
+    </script>
+</body>
+
+</html>

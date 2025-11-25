@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sąsiedztwa - Osiedlowo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg-dark: #0f172a;
+            --bg-darker: #020617;
+            --bg-light: #1e293b;
+            --bg-lighter: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, var(--bg-darker) 0%, var(--bg-dark) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px var(--shadow);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .nav-bar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .nav-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-light);
+            color: var(--text-primary);
+            border: 2px solid var(--border);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px var(--shadow);
+            border-color: var(--primary);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-color: var(--primary-light);
+        }
+
+        .status-bar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .status-item {
+            flex: 1;
+            min-width: 200px;
+            padding: 20px;
+            background: var(--bg-light);
+            border-radius: 15px;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .status-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px var(--shadow);
+        }
+
+        .status-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+        }
+
+        .status-info h3 {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-info p {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .panel {
+            background: var(--bg-light);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            box-shadow: 0 10px 40px var(--shadow);
+            margin-bottom: 30px;
+        }
+
+        .panel-header {
+            padding: 20px 25px;
+            background: var(--bg-lighter);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .panel-header h2 {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .panel-icon {
+            font-size: 1.5rem;
+        }
+
+        .panel-body {
+            padding: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-dark);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px var(--shadow);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        .user-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .user-item {
+            padding: 12px 16px;
+            background: var(--bg-dark);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .user-item:hover {
+            background: var(--bg-lighter);
+            transform: translateX(5px);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1.3rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .log-panel {
+            background: var(--bg-dark);
+            border-radius: 12px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            height: 200px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+        }
+
+        .log-entry {
+            margin-bottom: 8px;
+            padding: 8px;
+            border-radius: 6px;
+            background: var(--bg-lighter);
+        }
+
+        .log-time {
+            color: var(--text-secondary);
+            margin-right: 10px;
+        }
+
+        .log-info {
+            color: var(--primary-light);
+        }
+
+        .log-success {
+            color: var(--success);
+        }
+
+        .log-error {
+            color: var(--danger);
+        }
+
+        .log-warning {
+            color: var(--warning);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab:hover:not(.active) {
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏘️ Sąsiedztwa Osiedlowo</h1>
+            <p>Zarządzaj swoimi sąsiedztwami i społecznościami</p>
+        </div>
+
+        <div class="nav-bar">
+            <button class="nav-btn active">
+                🏘️ Sąsiedztwa
+            </button>
+            <button class="nav-btn" onclick="window.location.href='chat-test.html'">
+                💬 Czat
+            </button>
+            <button class="nav-btn" onclick="logout()"
+                style="margin-left: auto; border-color: var(--danger); color: var(--danger);">
+                🚪 Wyloguj
+            </button>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-item">
+                <div class="status-icon">👤</div>
+                <div class="status-info">
+                    <h3>Użytkownik</h3>
+                    <p id="currentUser">Nie zalogowany</p>
+                </div>
+            </div>
+            <div class="status-item">
+                <div class="status-icon">🏘️</div>
+                <div class="status-info">
+                    <h3>Moje sąsiedztwa</h3>
+                    <p id="myNeighborhoodsCount">0</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel logowania/rejestracji -->
+        <div id="authSection">
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-icon">🔐</span>
+                    <h2>Logowanie</h2>
+                </div>
+                <div class="panel-body">
+                    <div class="tabs">
+                        <div class="tab active" onclick="switchTab('login')">Logowanie</div>
+                        <div class="tab" onclick="switchTab('register')">Rejestracja</div>
+                    </div>
+
+                    <!-- Formularz logowania -->
+                    <div id="loginForm">
+                        <div class="form-group">
+                            <label for="loginEmail">Email</label>
+                            <input type="email" id="loginEmail" class="form-control" placeholder="jan@kowalski.pl">
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword">Hasło</label>
+                            <input type="password" id="loginPassword" class="form-control" placeholder="******">
+                        </div>
+                        <button class="btn btn-primary btn-block" onclick="login()">
+                            🔓 Zaloguj się
+                        </button>
+                    </div>
+
+                    <!-- Formularz rejestracji -->
+                    <div id="registerForm" style="display: none;">
+                        <div class="form-group">
+                            <label for="regEmail">Email</label>
+                            <input type="email" id="regEmail" class="form-control" placeholder="jan@kowalski.pl">
+                        </div>
+                        <div class="form-group">
+                            <label for="regFirstName">Imię</label>
+                            <input type="text" id="regFirstName" class="form-control" placeholder="Jan">
+                        </div>
+                        <div class="form-group">
+                            <label for="regLastName">Nazwisko</label>
+                            <input type="text" id="regLastName" class="form-control" placeholder="Kowalski">
+                        </div>
+                        <div class="form-group">
+                            <label for="regPassword">Hasło (min. 6 znaków)</label>
+                            <input type="password" id="regPassword" class="form-control" placeholder="******">
+                        </div>
+                        <button class="btn btn-success btn-block" onclick="register()">
+                            ✨ Zarejestruj się
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel zarządzania sąsiedztwami -->
+        <div id="neighborhoodsSection" style="display: none;">
+            <!-- Panel tworzenia sąsiedztwa -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-icon">➕</span>
+                    <h2>Utwórz nowe sąsiedztwo</h2>
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label for="newNeighborhoodName">Nazwa sąsiedztwa</label>
+                        <input type="text" id="newNeighborhoodName" class="form-control"
+                            placeholder="np. Osiedle Dębowe">
+                    </div>
+                    <div class="form-group">
+                        <label for="newNeighborhoodCity">Miasto</label>
+                        <input type="text" id="newNeighborhoodCity" class="form-control" placeholder="np. Warszawa">
+                    </div>
+                    <button class="btn btn-success btn-block" onclick="createNeighborhood()">
+                        ➕ Utwórz sąsiedztwo
+                    </button>
+                </div>
+            </div>
+
+            <!-- Panel dostępnych sąsiedztw -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-icon">🏘️</span>
+                    <h2>Przeglądaj sąsiedztwa</h2>
+                </div>
+                <div class="panel-body">
+                    <div class="tabs">
+                        <div class="tab active" onclick="switchNeighborhoodTab('my')">Moje sąsiedztwa</div>
+                        <div class="tab" onclick="switchNeighborhoodTab('search')">Wyszukaj</div>
+                    </div>
+
+                    <div id="searchContainer" style="display: none; margin-bottom: 20px;">
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="searchInput" class="form-control"
+                                placeholder="Wpisz nazwę lub miasto..."
+                                onkeypress="if(event.key === 'Enter') searchNeighborhoods()">
+                            <button class="btn btn-primary" onclick="searchNeighborhoods()">🔍 Szukaj</button>
+                        </div>
+                    </div>
+
+                    <div id="neighborhoodsList" class="user-list">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🏘️</div>
+                            <p>Ładowanie...</p>
+                        </div>
+                    </div>
+
+                    <button id="refreshBtn" class="btn btn-primary btn-block" onclick="loadNeighborhoods('my')"
+                        style="margin-top: 20px;">
+                        🔄 Odśwież listę
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel logów -->
+        <div class="panel">
+            <div class="panel-header">
+                <span class="panel-icon">📋</span>
+                <h2>Logi systemowe</h2>
+            </div>
+            <div class="panel-body">
+                <div id="logPanel" class="log-panel"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3001/api';
+
+        // POBIERAMY DANE Z PAMIĘCI PRZY STARCIE
+        let authToken = localStorage.getItem('authToken');
+        let currentUserId = localStorage.getItem('currentUserId');
+
+        // Nowe zmienne do pamiętania nazwy
+        let currentUserName = localStorage.getItem('currentUserName');
+        let currentUserEmail = localStorage.getItem('currentUserEmail');
+
+        let currentUserData = null;
+        let currentMode = 'my'; // 'my' or 'search'
+
+        // Inicjalizacja
+        if (authToken) {
+            checkAuth();
+        }
+
+        // Pomocnicza funkcja do ładnego wyświetlania nazwy
+        function getUserDisplayName(user) {
+            if (!user) return 'Użytkownik';
+            if (user.firstName && user.lastName) {
+                return `${user.firstName} ${user.lastName}`;
+            }
+            return user.email || 'Nieznany';
+        }
+
+        // Aktualizacja nagłówka z nazwą usera
+        function updateHeaderUser() {
+            const display = document.getElementById('currentUser');
+            if (currentUserName && currentUserName !== 'null') {
+                display.textContent = currentUserName;
+            } else if (currentUserEmail) {
+                display.textContent = currentUserEmail;
+            } else {
+                display.textContent = 'Zalogowany';
+            }
+        }
+
+        function switchTab(tab) {
+            const tabs = document.querySelectorAll('#authSection .tab');
+            tabs.forEach(t => t.classList.remove('active'));
+
+            if (tab === 'login') {
+                tabs[0].classList.add('active');
+                document.getElementById('loginForm').style.display = 'block';
+                document.getElementById('registerForm').style.display = 'none';
+            } else {
+                tabs[1].classList.add('active');
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('registerForm').style.display = 'block';
+            }
+        }
+
+        function switchNeighborhoodTab(mode) {
+            currentMode = mode;
+            const tabs = document.querySelectorAll('#neighborhoodsSection .tab');
+
+            if (mode === 'my') {
+                tabs[0].classList.add('active');
+                tabs[1].classList.remove('active');
+                document.getElementById('searchContainer').style.display = 'none';
+                document.getElementById('refreshBtn').style.display = 'block';
+                loadNeighborhoods('my');
+            } else {
+                tabs[0].classList.remove('active');
+                tabs[1].classList.add('active');
+                document.getElementById('searchContainer').style.display = 'block';
+                document.getElementById('refreshBtn').style.display = 'none';
+                document.getElementById('neighborhoodsList').innerHTML = '<div class="empty-state"><p>Wpisz frazę aby wyszukać...</p></div>';
+            }
+        }
+
+        function log(message, type = 'info') {
+            const logPanel = document.getElementById('logPanel');
+            const time = new Date().toLocaleTimeString('pl-PL');
+            const entry = document.createElement('div');
+            entry.style.marginBottom = "5px";
+            entry.style.color = type === 'error' ? '#ef4444' : (type === 'success' ? '#10b981' : '#818cf8');
+            entry.innerHTML = `<span class="log-time">[${time}]</span> <span>${message}</span>`;
+            logPanel.appendChild(entry);
+            logPanel.scrollTop = logPanel.scrollHeight;
+            console.log(`[${type.toUpperCase()}]`, message);
+        }
+
+        function logout() {
+            localStorage.clear(); // Czyści wszystko (token, id, imie, email)
+            window.location.reload();
+        }
+
+        async function checkAuth() {
+            if (!currentUserId) {
+                log('⚠️ Brak ID użytkownika - wymagane ponowne logowanie', 'warning');
+                localStorage.removeItem('authToken');
+                return;
+            }
+
+            try {
+                // Sprawdzamy token pobierając moje sąsiedztwa
+                const response = await fetch(`${API_URL}/neighborhoods?mode=my`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                if (response.ok) {
+                    log('✅ Zalogowano automatycznie', 'success');
+                    updateHeaderUser(); // Przywróć nazwę w nagłówku
+
+                    document.getElementById('authSection').style.display = 'none';
+                    document.getElementById('neighborhoodsSection').style.display = 'block';
+                    loadNeighborhoods('my');
+                } else {
+                    localStorage.clear();
+                    authToken = null;
+                    log('⚠️ Sesja wygasła', 'warning');
+                }
+            } catch (error) {
+                log(`❌ Błąd weryfikacji: ${error.message}`, 'error');
+            }
+        }
+
+        // --- KLUCZOWA ZMIANA W LOGOWANIU ---
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const response = await fetch(`${API_URL}/users/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    authToken = data.data.token;
+                    currentUserData = data.data.user;
+                    currentUserId = currentUserData.id;
+
+                    // Budowanie ładnej nazwy (Imię + Nazwisko)
+                    let userName = currentUserData.email;
+                    if (currentUserData.firstName && currentUserData.lastName) {
+                        userName = `${currentUserData.firstName} ${currentUserData.lastName}`;
+                    } else if (currentUserData.firstName) {
+                        userName = currentUserData.firstName;
+                    }
+
+                    // ZAPIS DO PAMIĘCI (żeby Czat to widział)
+                    localStorage.setItem('authToken', authToken);
+                    localStorage.setItem('currentUserId', currentUserId);
+                    localStorage.setItem('currentUserEmail', currentUserData.email);
+                    localStorage.setItem('currentUserName', userName);
+
+                    // Aktualizacja zmiennych lokalnych
+                    currentUserName = userName;
+                    currentUserEmail = currentUserData.email;
+
+                    updateHeaderUser();
+
+                    document.getElementById('authSection').style.display = 'none';
+                    document.getElementById('neighborhoodsSection').style.display = 'block';
+
+                    log(`✅ Zalogowano jako: ${userName}`, 'success');
+                    loadNeighborhoods('my');
+                } else {
+                    log(`❌ Błąd logowania: ${data.message || 'Nieznany błąd'}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Błąd połączenia: ${error.message}`, 'error');
+            }
+        }
+
+        async function register() {
+            const email = document.getElementById('regEmail').value;
+            const firstName = document.getElementById('regFirstName').value;
+            const lastName = document.getElementById('regLastName').value;
+            const password = document.getElementById('regPassword').value;
+
+            try {
+                const response = await fetch(`${API_URL}/users/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, firstName, lastName, password })
+                });
+
+                if (response.ok) {
+                    log(`✅ Zarejestrowano: ${email}`, 'success');
+                    alert('Możesz się teraz zalogować.');
+                    switchTab('login');
+                } else {
+                    const data = await response.json();
+                    log(`❌ Błąd: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Błąd: ${error.message}`, 'error');
+            }
+        }
+
+        async function loadNeighborhoods(mode = 'my') {
+            try {
+                let url = `${API_URL}/neighborhoods`;
+                if (mode === 'my') {
+                    url += '?mode=my';
+                }
+
+                const response = await fetch(url, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const neighborhoods = await response.json();
+
+                if (response.ok) {
+                    displayNeighborhoods(neighborhoods);
+                    if (mode === 'my') {
+                        document.getElementById('myNeighborhoodsCount').textContent = neighborhoods.length;
+                    }
+                }
+            } catch (error) {
+                log(`❌ Błąd ładowania listy: ${error.message}`, 'error');
+            }
+        }
+
+        async function searchNeighborhoods() {
+            const query = document.getElementById('searchInput').value;
+            if (!query || query.length < 2) {
+                alert('Wpisz co najmniej 2 znaki');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/neighborhoods?q=${encodeURIComponent(query)}`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const neighborhoods = await response.json();
+
+                if (response.ok) {
+                    displayNeighborhoods(neighborhoods);
+                    log(`🔍 Znaleziono ${neighborhoods.length} wyników dla "${query}"`);
+                }
+            } catch (error) {
+                log(`❌ Błąd wyszukiwania: ${error.message}`, 'error');
+            }
+        }
+
+        function displayNeighborhoods(neighborhoods) {
+            const list = document.getElementById('neighborhoodsList');
+            list.innerHTML = '';
+
+            if (neighborhoods.length === 0) {
+                list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🏘️</div><p>Brak wyników</p></div>';
+                return;
+            }
+
+            neighborhoods.forEach(n => {
+                // Używamy "miękkiego" porównania (== zamiast ===) na wypadek różnic typów (string vs number)
+                const isMember = n.members?.some(m => m.id == currentUserId);
+                const isAdmin = n.adminId == currentUserId;
+
+                const div = document.createElement('div');
+                div.className = 'user-item';
+                div.innerHTML = `
+                    <div class="user-info">
+                        <div class="user-avatar">🏘️</div>
+                        <div>
+                            <div style="font-weight: 600;">${n.name}</div>
+                            <div style="font-size: 0.9rem; color: var(--text-secondary);">
+                                📍 ${n.city} • 👥 ${n.members?.length || 0}
+                                ${isMember ? ' <span style="color:var(--success)">(Jesteś członkiem)</span>' : ''}
+                                ${isAdmin ? ' <span style="color:var(--warning)">⭐ Admin</span>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:10px;">
+                        ${isAdmin
+                        ? `<button class="btn btn-danger" onclick="deleteNeighborhood('${n.id}', '${n.name}')">🗑️ Usuń</button>`
+                        : ''
+                    }
+                        ${isMember
+                        ? `<button class="btn btn-danger" onclick="leaveNeighborhood('${n.id}', '${n.name}')">🚪 Opuść</button>`
+                        : `<button class="btn btn-success" onclick="joinNeighborhood('${n.id}', '${n.name}')">➕ Dołącz</button>`
+                    }
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        async function createNeighborhood() {
+            const name = document.getElementById('newNeighborhoodName').value;
+            const city = document.getElementById('newNeighborhoodCity').value;
+            if (!name || !city) return alert('Podaj nazwę i miasto');
+
+            try {
+                const res = await fetch(`${API_URL}/neighborhoods`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+                    body: JSON.stringify({ name, city })
+                });
+                if (res.ok) {
+                    log('✅ Utworzono sąsiedztwo', 'success');
+                    loadNeighborhoods('my');
+                    document.getElementById('newNeighborhoodName').value = '';
+                    document.getElementById('newNeighborhoodCity').value = '';
+                }
+            } catch (e) { log('Błąd tworzenia', 'error'); }
+        }
+
+        async function joinNeighborhood(id, name) {
+            log(`⏳ Próba dołączenia do: ${name}...`);
+            try {
+                const response = await fetch(`${API_URL}/neighborhoods/${id}/join`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                if (response.ok) {
+                    log(`✅ Dołączono do: ${name}`, 'success');
+                    if (currentMode === 'my') loadNeighborhoods('my');
+                    else searchNeighborhoods();
+                } else {
+                    const data = await response.json();
+                    log(`❌ Nie udało się dołączyć: ${data.message}`, 'error');
+                    alert(`Błąd: ${data.message}`);
+                }
+            } catch (error) {
+                log(`❌ Błąd sieci: ${error.message}`, 'error');
+            }
+        }
+
+        async function leaveNeighborhood(id, name) {
+            if (!confirm(`Czy na pewno chcesz opuścić "${name}"?`)) return;
+
+            log(`⏳ Opuszczanie: ${name}...`);
+            try {
+                const response = await fetch(`${API_URL}/neighborhoods/${id}/leave`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                if (response.ok) {
+                    log(`✅ Opuszczono: ${name}`, 'success');
+                    if (currentMode === 'my') loadNeighborhoods('my');
+                    else searchNeighborhoods();
+                } else {
+                    const data = await response.json();
+                    log(`❌ Błąd podczas opuszczania: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Błąd sieci: ${error.message}`, 'error');
+            }
+        }
+
+        async function deleteNeighborhood(id, name) {
+            if (!confirm(`Czy na pewno chcesz USUNĄĆ sąsiedztwo "${name}"? Tej operacji nie można cofnąć.`)) return;
+
+            log(`⏳ Usuwanie: ${name}...`);
+            try {
+                const response = await fetch(`${API_URL}/neighborhoods/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                if (response.ok) {
+                    log(`✅ Usunięto: ${name}`, 'success');
+                    if (currentMode === 'my') loadNeighborhoods('my');
+                    else searchNeighborhoods();
+                } else {
+                    const data = await response.json();
+                    log(`❌ Błąd usuwania: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Błąd sieci: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+
+</html>

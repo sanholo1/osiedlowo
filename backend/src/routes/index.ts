@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import userRoutes from './user.routes';
+import chatRoutes from './chat.routes';
+import neighborhoodRoutes from './neighborhood.routes';
 
 const router = Router();
 
@@ -15,6 +17,8 @@ router.get('/health', (req, res) => {
 
 // Module routes
 router.use('/users', userRoutes);
+router.use('/chat', chatRoutes);
+router.use('/neighborhoods', neighborhoodRoutes);
 
 
 

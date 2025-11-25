@@ -11,6 +11,7 @@ docker compose up -d
 
 ### 3️⃣ Otwórz przeglądarkę
 - **Frontend**: http://localhost:3000
+- **Klient Czatu (Test)**: http://localhost:3001/chat-test.html
 
 ## Zatrzymanie aplikacji
 ```bash

@@ -36,6 +36,18 @@ export class UserRepository {
     return result.affected !== 0;
   }
 
+  async searchByName(query: string): Promise<User[]> {
+    return this.repository
+      .createQueryBuilder('user')
+      .where('user.username LIKE :query', { query: `%${query}%` })
+      .orWhere('user.firstName LIKE :query', { query: `%${query}%` })
+      .orWhere('user.lastName LIKE :query', { query: `%${query}%` })
+      .orWhere('user.email LIKE :query', { query: `%${query}%` })
+      .andWhere('user.isActive = :isActive', { isActive: true })
+      .limit(20)
+      .getMany();
+  }
+
   async exists(email: string): Promise<boolean> {
     const count = await this.repository.count({ where: { email } });
     return count > 0;

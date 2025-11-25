@@ -1,26 +1,31 @@
 import 'reflect-metadata';
 import express, { Application } from 'express';
+import { createServer } from 'http';
 import cors from 'cors';
 import { config } from 'dotenv';
 import { AppDataSource } from '@config/database';
 import { appConfig } from '@config/app.config';
 import routes from './routes';
 import { globalExceptionHandler } from './exceptions';
+import { initializeSocket } from './socket';
 
 // Załaduj zmienne środowiskowe
 config({ path: '../.env' });
 
 class App {
   public app: Application;
+  private httpServer;
   private PORT: number;
 
   constructor() {
     this.app = express();
+    this.httpServer = createServer(this.app);
     this.PORT = appConfig.port;
-    
+
     this.initializeMiddlewares();
     this.initializeRoutes();
     this.initializeErrorHandling();
+    this.initializeSocket();
   }
 
   private initializeMiddlewares(): void {
@@ -33,6 +38,9 @@ class App {
     // Body parsing
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
+
+    // Serve static files from public directory
+    this.app.use(express.static('public'));
 
     // Request logging (development only)
     if (appConfig.nodeEnv === 'development') {
@@ -55,6 +63,7 @@ class App {
         endpoints: {
           health: '/api/health',
           users: '/api/users',
+          chat: '/api/chat',
         }
       });
     });
@@ -62,6 +71,10 @@ class App {
 
   private initializeErrorHandling(): void {
     this.app.use(globalExceptionHandler);
+  }
+
+  private initializeSocket(): void {
+    initializeSocket(this.httpServer);
   }
 
   public async initializeDatabase(): Promise<void> {
@@ -75,10 +88,12 @@ class App {
   }
 
   public listen(): void {
-    this.app.listen(this.PORT, () => {
+    this.httpServer.listen(this.PORT, () => {
       console.log('🚀 Osiedlowo Backend');
       console.log(`📡 Server: http://localhost:${this.PORT}`);
       console.log(`🏥 Health: http://localhost:${this.PORT}/api/health`);
+      console.log(`💬 Chat: http://localhost:${this.PORT}/api/chat`);
+      console.log(`⚡ WebSocket: ws://localhost:${this.PORT}`);
       console.log(`🌍 Environment: ${appConfig.nodeEnv}`);
     });
   }
