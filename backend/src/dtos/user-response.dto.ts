@@ -5,6 +5,7 @@ export class UserResponseDto {
   email: string;
   firstName: string;
   lastName: string;
+  address: string;
   role: string;
   isActive: boolean;
   createdAt: Date;
@@ -16,6 +17,7 @@ export class UserResponseDto {
     dto.email = user.email;
     dto.firstName = user.firstName;
     dto.lastName = user.lastName;
+    dto.address = user.address;
     dto.role = user.role;
     dto.isActive = user.isActive;
     dto.createdAt = user.createdAt;

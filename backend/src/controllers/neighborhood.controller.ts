@@ -53,17 +53,23 @@ export class NeighborhoodController {
 
     createNeighborhood = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const { name, city } = req.body;
+            const { name, city, isPrivate, password } = req.body;
             const adminId = req.user!.userId;
 
             if (!name || !city) {
                 return res.status(400).json({ message: 'Nazwa i miasto są wymagane' });
             }
 
+            if (isPrivate && !password) {
+                return res.status(400).json({ message: 'Hasło jest wymagane dla prywatnych osiedli' });
+            }
+
             const neighborhood = await this.neighborhoodService.createNeighborhood({
                 name,
                 city,
-                adminId
+                adminId,
+                isPrivate: isPrivate || false,
+                password: isPrivate ? password : undefined
             });
 
             res.status(201).json(neighborhood);
@@ -75,9 +81,10 @@ export class NeighborhoodController {
     joinNeighborhood = async (req: AuthenticatedRequest, res: Response) => {
         try {
             const { id } = req.params;
+            const { password } = req.body;
             const userId = req.user!.userId;
 
-            await this.neighborhoodService.joinNeighborhood(id, userId);
+            await this.neighborhoodService.joinNeighborhood(id, userId, password);
             res.json({ message: 'Dołączono do sąsiedztwa' });
         } catch (error: any) {
             res.status(400).json({ message: error.message });

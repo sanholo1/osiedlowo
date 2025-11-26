@@ -25,19 +25,16 @@ export class ChatService {
     }
 
     async getOrCreatePrivateConversation(user1Id: string, user2Id: string): Promise<Conversation> {
-        // Check if conversation already exists
         const existing = await this.conversationRepository.findPrivateConversation(user1Id, user2Id);
         if (existing) {
             return existing;
         }
 
-        // Verify both users exist
         const user2 = await this.userRepository.findById(user2Id);
         if (!user2) {
             throw new NotFoundException('Użytkownik nie został znaleziony');
         }
 
-        // Create new private conversation
         return this.conversationRepository.create({
             type: ConversationType.PRIVATE,
             participantIds: [user1Id, user2Id],
@@ -102,7 +99,6 @@ export class ChatService {
         limit: number = 50,
         offset: number = 0
     ): Promise<MessageResponseDto[]> {
-        // Verify user is participant
         const isParticipant = await this.conversationRepository.isParticipant(conversationId, userId);
         if (!isParticipant) {
             throw new ForbiddenException('Nie masz dostępu do tej konwersacji');
@@ -132,7 +128,6 @@ export class ChatService {
         senderId: string,
         content: string
     ): Promise<Message> {
-        // Verify user is participant
         const isParticipant = await this.conversationRepository.isParticipant(conversationId, senderId);
         if (!isParticipant) {
             throw new ForbiddenException('Nie masz dostępu do tej konwersacji');
@@ -144,14 +139,12 @@ export class ChatService {
             content,
         });
 
-        // Mark as read by sender
         await this.messageRepository.markAsRead(message.id, senderId);
 
         return message;
     }
 
     async markMessagesAsRead(conversationId: string, userId: string): Promise<void> {
-        // Verify user is participant
         const isParticipant = await this.conversationRepository.isParticipant(conversationId, userId);
         if (!isParticipant) {
             throw new ForbiddenException('Nie masz dostępu do tej konwersacji');

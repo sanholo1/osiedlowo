@@ -11,6 +11,7 @@ interface AuthContextType {
     login: (data: LoginForm) => Promise<boolean>;
     register: (data: RegisterForm) => Promise<boolean>;
     logout: () => void;
+    updateUser: (userData: Partial<User>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -50,8 +51,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setMessage('Zarejestrowano pomyślnie! Możesz się teraz zalogować.');
             return true;
         } catch (error: any) {
-            const errorMessage = error.response?.data?.errors 
-                ? error.response.data.errors.join(', ') 
+            const errorMessage = error.response?.data?.errors
+                ? error.response.data.errors.join(', ')
                 : error.response?.data?.message || 'Błąd rejestracji';
             setMessage(errorMessage);
             return false;
@@ -69,6 +70,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setMessage('Wylogowano');
     };
 
+    const updateUser = (userData: Partial<User>) => {
+        const updatedUser = { ...user, ...userData } as User;
+        setUser(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+    };
+
     const value = {
         user,
         token,
@@ -78,6 +85,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         login,
         register,
         logout,
+        updateUser,
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

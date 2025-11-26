@@ -14,13 +14,11 @@ import { SearchForGroupPage } from './pages/SearchForGroupPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { GroupPage } from './pages/GroupPage';
 
-// Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isLoggedIn } = useAuth();
   return isLoggedIn ? <>{children}</> : <Navigate to="/login" replace />;
 };
 
-// Public Route Component (redirects to home if already logged in)
 const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isLoggedIn } = useAuth();
   return !isLoggedIn ? <>{children}</> : <Navigate to="/home" replace />;

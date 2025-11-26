@@ -13,10 +13,9 @@ export class UserController {
 
   register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      // Walidacja DTO
       const createUserDto = plainToInstance(CreateUserDto, req.body);
       const errors = await validate(createUserDto);
-      
+
       if (errors.length > 0) {
         const messages = errors.map(err => Object.values(err.constraints || {})).flat();
         res.status(400).json({
@@ -42,10 +41,9 @@ export class UserController {
 
   login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      // Walidacja DTO
       const loginUserDto = plainToInstance(LoginUserDto, req.body);
       const errors = await validate(loginUserDto);
-      
+
       if (errors.length > 0) {
         const messages = errors.map(err => Object.values(err.constraints || {})).flat();
         res.status(400).json({
@@ -100,7 +98,6 @@ export class UserController {
 
   getProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      // User ID pochodzi z middleware auth
       const userId = (req as any).user.userId;
       const user = await this.userService.findById(userId);
       const responseDto = UserResponseDto.fromEntity(user);
@@ -116,12 +113,11 @@ export class UserController {
 
   update = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { id } = req.params;
+      const userId = req.params.id || (req as any).user.userId;
 
-      // Walidacja DTO
       const updateUserDto = plainToInstance(UpdateUserDto, req.body);
       const errors = await validate(updateUserDto);
-      
+
       if (errors.length > 0) {
         const messages = errors.map(err => Object.values(err.constraints || {})).flat();
         res.status(400).json({
@@ -132,7 +128,7 @@ export class UserController {
         return;
       }
 
-      const user = await this.userService.update(id, updateUserDto);
+      const user = await this.userService.update(userId, updateUserDto);
       const responseDto = UserResponseDto.fromEntity(user);
 
       res.json({

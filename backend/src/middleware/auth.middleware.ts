@@ -23,14 +23,12 @@ export const authMiddleware = async (
       throw new UnauthorizedException('Token autoryzacji jest wymagany');
     }
 
-    // Weryfikuj token
     const decoded = jwt.verify(token, appConfig.jwt.secret) as {
       userId: string;
       email: string;
       role: string;
     };
 
-    // Dołącz użytkownika do żądania
     req.user = {
       userId: decoded.userId,
       email: decoded.email,
@@ -56,7 +54,6 @@ const extractTokenFromHeader = (req: Request): string | null => {
     return null;
   }
 
-  // Format: "Bearer <token>"
   const parts = authHeader.split(' ');
 
   if (parts.length !== 2 || parts[0] !== 'Bearer') {

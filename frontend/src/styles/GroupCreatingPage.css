@@ -1,0 +1,17 @@
+.group-creating-message {
+    margin-top: 15px;
+    padding: 10px;
+    font-weight: bold;
+}
+
+.group-creating-message.success {
+    color: green;
+}
+
+.group-creating-message.error {
+    color: red;
+}
+
+.back-button {
+    margin-top: 20px;
+}

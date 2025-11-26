@@ -23,7 +23,13 @@ export class NeighborhoodRepository {
         });
     }
 
-    async create(data: { name: string; city: string; adminId: string }): Promise<Neighborhood> {
+    async create(data: {
+        name: string;
+        city: string;
+        adminId: string;
+        isPrivate?: boolean;
+        password?: string;
+    }): Promise<Neighborhood> {
         const result = await this.repository
             .createQueryBuilder()
             .insert()
@@ -31,7 +37,9 @@ export class NeighborhoodRepository {
             .values({
                 name: data.name,
                 city: data.city,
-                adminId: data.adminId
+                adminId: data.adminId,
+                isPrivate: data.isPrivate,
+                password: data.password
             })
             .execute();
 
@@ -87,7 +95,6 @@ export class NeighborhoodRepository {
             .where('(LOWER(neighborhood.name) LIKE LOWER(:query) OR LOWER(neighborhood.city) LIKE LOWER(:query))', { query: `%${query}%` });
 
         if (excludeUserId) {
-            // Exclude neighborhoods where the user is already a member
             qb.andWhere(qb => {
                 const subQuery = qb.subQuery()
                     .select('1')

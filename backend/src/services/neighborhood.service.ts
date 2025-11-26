@@ -2,6 +2,7 @@ import { NeighborhoodRepository } from '../repositories/neighborhood.repository'
 import { ConversationRepository } from '../repositories/conversation.repository';
 import { Neighborhood } from '../entities/neighborhood.entity';
 import { ConversationType } from '../entities/conversation.entity';
+import * as bcrypt from 'bcrypt';
 
 export class NeighborhoodService {
     private neighborhoodRepository: NeighborhoodRepository;
@@ -28,14 +29,28 @@ export class NeighborhoodService {
         return this.neighborhoodRepository.findById(id);
     }
 
-    async createNeighborhood(data: { name: string; city: string; adminId: string }): Promise<Neighborhood> {
-        // Utwórz sąsiedztwo
-        const neighborhood = await this.neighborhoodRepository.create(data);
+    async createNeighborhood(data: {
+        name: string;
+        city: string;
+        adminId: string;
+        isPrivate?: boolean;
+        password?: string;
+    }): Promise<Neighborhood> {
+        let hashedPassword: string | undefined;
+        if (data.isPrivate && data.password) {
+            hashedPassword = await bcrypt.hash(data.password, 10);
+        }
 
-        // Dodaj admina jako członka
+        const neighborhood = await this.neighborhoodRepository.create({
+            name: data.name,
+            city: data.city,
+            adminId: data.adminId,
+            isPrivate: data.isPrivate || false,
+            password: hashedPassword
+        });
+
         await this.neighborhoodRepository.addMember(neighborhood.id, data.adminId);
 
-        // Utwórz grupową konwersację dla sąsiedztwa
         await this.conversationRepository.create({
             type: ConversationType.GROUP,
             name: neighborhood.name,
@@ -46,16 +61,30 @@ export class NeighborhoodService {
         return this.neighborhoodRepository.findById(neighborhood.id) as Promise<Neighborhood>;
     }
 
-    async joinNeighborhood(neighborhoodId: string, userId: string): Promise<void> {
+    async joinNeighborhood(neighborhoodId: string, userId: string, password?: string): Promise<void> {
+        const neighborhood = await this.neighborhoodRepository.findById(neighborhoodId);
+        if (!neighborhood) {
+            throw new Error('Sąsiedztwo nie istnieje');
+        }
+
+        if (neighborhood.isPrivate) {
+            if (!password) {
+                throw new Error('To osiedle jest prywatne. Wymagane jest hasło.');
+            }
+
+            const isPasswordValid = await bcrypt.compare(password, neighborhood.password);
+            if (!isPasswordValid) {
+                throw new Error('Nieprawidłowe hasło');
+            }
+        }
+
         const isMember = await this.neighborhoodRepository.isMember(neighborhoodId, userId);
         if (isMember) {
             throw new Error('Już jesteś członkiem tego sąsiedztwa');
         }
 
-        // Dodaj użytkownika do sąsiedztwa
         await this.neighborhoodRepository.addMember(neighborhoodId, userId);
 
-        // Znajdź konwersację grupową sąsiedztwa i dodaj użytkownika
         const conversation = await this.conversationRepository.findByNeighborhoodId(neighborhoodId);
         if (conversation) {
             await this.conversationRepository.addParticipant(conversation.id, userId);
@@ -77,10 +106,8 @@ export class NeighborhoodService {
             throw new Error('Nie jesteś członkiem tego sąsiedztwa');
         }
 
-        // Usuń użytkownika z sąsiedztwa
         await this.neighborhoodRepository.removeMember(neighborhoodId, userId);
 
-        // Usuń użytkownika z konwersacji grupowej
         const conversation = await this.conversationRepository.findByNeighborhoodId(neighborhoodId);
         if (conversation) {
             await this.conversationRepository.removeParticipant(conversation.id, userId);
@@ -97,13 +124,11 @@ export class NeighborhoodService {
             throw new Error('Tylko administrator może usunąć sąsiedztwo');
         }
 
-        // Znajdź i usuń konwersację grupową
         const conversation = await this.conversationRepository.findByNeighborhoodId(neighborhoodId);
         if (conversation) {
             await this.conversationRepository.delete(conversation.id);
         }
 
-        // Usuń sąsiedztwo
         await this.neighborhoodRepository.delete(neighborhoodId);
     }
 }

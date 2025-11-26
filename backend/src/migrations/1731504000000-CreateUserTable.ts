@@ -74,7 +74,6 @@ export class CreateUserTable1731504000000 implements MigrationInterface {
       true,
     );
 
-    // Dodaj indeksy dla lepszej wydajności
     await queryRunner.query(`CREATE INDEX IDX_USER_EMAIL ON users(email)`);
     await queryRunner.query(`CREATE INDEX IDX_USER_ROLE ON users(role)`);
     await queryRunner.query(`CREATE INDEX IDX_USER_CREATED_AT ON users(createdAt)`);

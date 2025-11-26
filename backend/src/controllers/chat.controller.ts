@@ -34,7 +34,6 @@ export class ChatController {
                     dto.participantIds[0]
                 );
             } else {
-                // Group conversation
                 const allParticipants = [userId, ...dto.participantIds];
                 conversation = await this.chatService.createGroupConversation(
                     dto.name || 'Grupa',
@@ -102,7 +101,6 @@ export class ChatController {
 
             const users = await this.chatService.searchUsersByName(query, userId);
 
-            // Remove password from response
             const sanitizedUsers = users.map(user => user.toJSON());
 
             res.json(sanitizedUsers);

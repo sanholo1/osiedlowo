@@ -52,7 +52,6 @@ export class ConversationRepository {
             .leftJoinAndSelect('allParticipants.user', 'user')
             .getMany();
 
-        // Filter to ensure only 2 participants (exact match)
         const exactMatch = conversations.find(conv => conv.participants.length === 2);
         return exactMatch || null;
     }
@@ -77,12 +76,10 @@ export class ConversationRepository {
 
         const savedConversation = await this.repository.save(conversation);
 
-        // Add participants
         for (const userId of data.participantIds) {
             await this.addParticipant(savedConversation.id, userId);
         }
 
-        // Reload with participants
         const result = await this.findById(savedConversation.id);
         return result!;
     }

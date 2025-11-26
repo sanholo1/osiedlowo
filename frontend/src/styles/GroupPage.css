@@ -1,0 +1,75 @@
+.group-info-section {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+.group-info-section p {
+    margin: 8px 0;
+}
+
+.admin-badge {
+    color: green;
+}
+
+.error-message {
+    color: red;
+}
+
+.loading-message {
+    text-align: center;
+    color: #999;
+}
+
+.members-section {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+.members-list {
+    list-style: none;
+    padding: 0;
+}
+
+.member-item {
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+.member-admin-badge {
+    color: green;
+    margin-left: 10px;
+}
+
+.member-you-badge {
+    margin-left: 10px;
+}
+
+.chat-section {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+.chat-section h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.chat-container {
+    height: 400px;
+}
+
+.navigation-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.delete-button {
+    background-color: #dc3545;
+    color: white;
+}

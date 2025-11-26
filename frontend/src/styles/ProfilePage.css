@@ -1,0 +1,11 @@
+.profile-message {
+    margin-top: 10px;
+}
+
+.profile-message.success {
+    color: green;
+}
+
+.profile-message.error {
+    color: red;
+}

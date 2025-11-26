@@ -5,7 +5,6 @@ import neighborhoodRoutes from './neighborhood.routes';
 
 const router = Router();
 
-// Health check endpoint
 router.get('/health', (req, res) => {
   res.json({
     status: 'OK',
@@ -15,7 +14,6 @@ router.get('/health', (req, res) => {
   });
 });
 
-// Module routes
 router.use('/users', userRoutes);
 router.use('/chat', chatRoutes);
 router.use('/neighborhoods', neighborhoodRoutes);

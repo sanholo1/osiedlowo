@@ -33,7 +33,6 @@ export class MessageRepository {
         const message = this.repository.create(data);
         const savedMessage = await this.repository.save(message);
 
-        // Reload with relations
         return this.findById(savedMessage.id) as Promise<Message>;
     }
 

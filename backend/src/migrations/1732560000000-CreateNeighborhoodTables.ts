@@ -2,7 +2,6 @@ import { MigrationInterface, QueryRunner, Table, TableForeignKey } from 'typeorm
 
 export class CreateNeighborhoodTables1732560000000 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<void> {
-        // Tworzenie tabeli neighborhoods
         await queryRunner.createTable(
             new Table({
                 name: 'neighborhoods',
@@ -47,7 +46,6 @@ export class CreateNeighborhoodTables1732560000000 implements MigrationInterface
             true
         );
 
-        // Tworzenie tabeli neighborhood_members (relacja many-to-many)
         await queryRunner.createTable(
             new Table({
                 name: 'neighborhood_members',
@@ -69,7 +67,6 @@ export class CreateNeighborhoodTables1732560000000 implements MigrationInterface
             true
         );
 
-        // Klucze obce dla neighborhoods
         await queryRunner.createForeignKey(
             'neighborhoods',
             new TableForeignKey({
@@ -80,7 +77,6 @@ export class CreateNeighborhoodTables1732560000000 implements MigrationInterface
             })
         );
 
-        // Klucze obce dla neighborhood_members
         await queryRunner.createForeignKey(
             'neighborhood_members',
             new TableForeignKey({
@@ -101,12 +97,10 @@ export class CreateNeighborhoodTables1732560000000 implements MigrationInterface
             })
         );
 
-        // Dodanie klucza obcego do tabeli conversations (kolumna neighborhoodId już istnieje)
         const table = await queryRunner.getTable('conversations');
         const column = table?.findColumnByName('neighborhoodId');
 
         if (column) {
-            // Sprawdzamy czy FK już istnieje
             const fkExists = table?.foreignKeys.find(fk => fk.columnNames.indexOf('neighborhoodId') !== -1);
 
             if (!fkExists) {
@@ -124,7 +118,6 @@ export class CreateNeighborhoodTables1732560000000 implements MigrationInterface
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        // Usunięcie klucza obcego z conversations
         const conversationsTable = await queryRunner.getTable('conversations');
         const neighborhoodFk = conversationsTable?.foreignKeys.find(
             fk => fk.columnNames.indexOf('neighborhoodId') !== -1
@@ -133,9 +126,7 @@ export class CreateNeighborhoodTables1732560000000 implements MigrationInterface
             await queryRunner.dropForeignKey('conversations', neighborhoodFk);
         }
 
-        // Nie usuwamy kolumny neighborhoodId, bo została utworzona w innej migracji
 
-        // Usunięcie kluczy obcych z neighborhood_members
         const neighborhoodMembersTable = await queryRunner.getTable('neighborhood_members');
         if (neighborhoodMembersTable) {
             for (const foreignKey of neighborhoodMembersTable.foreignKeys) {
@@ -143,7 +134,6 @@ export class CreateNeighborhoodTables1732560000000 implements MigrationInterface
             }
         }
 
-        // Usunięcie kluczy obcych z neighborhoods
         const neighborhoodsTable = await queryRunner.getTable('neighborhoods');
         if (neighborhoodsTable) {
             for (const foreignKey of neighborhoodsTable.foreignKeys) {
@@ -151,7 +141,6 @@ export class CreateNeighborhoodTables1732560000000 implements MigrationInterface
             }
         }
 
-        // Usunięcie tabel
         await queryRunner.dropTable('neighborhood_members');
         await queryRunner.dropTable('neighborhoods');
     }

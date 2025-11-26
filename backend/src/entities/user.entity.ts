@@ -20,6 +20,9 @@ export class User {
   @Column({ nullable: true })
   lastName: string;
 
+  @Column({ nullable: true })
+  address: string;
+
   @Column({ default: 'user' })
   role: string;
 
