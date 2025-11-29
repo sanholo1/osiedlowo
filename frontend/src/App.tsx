@@ -13,6 +13,7 @@ import { UsersGroupsListPage } from './pages/UsersGroupsListPage';
 import { SearchForGroupPage } from './pages/SearchForGroupPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { GroupPage } from './pages/GroupPage';
+import { DirectMessagesPage } from './pages/DirectMessagesPage';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isLoggedIn } = useAuth();
@@ -29,10 +30,8 @@ const App: React.FC = () => {
     <AuthProvider>
       <Router>
         <Routes>
-          {/* Redirect from root to login */}
           <Route path="/" element={<Navigate to="/login" replace />} />
-          
-          {/* Public routes */}
+
           <Route
             path="/login"
             element={
@@ -57,8 +56,7 @@ const App: React.FC = () => {
               </PublicRoute>
             }
           />
-          
-          {/* Protected routes */}
+
           <Route
             path="/home"
             element={
@@ -80,6 +78,14 @@ const App: React.FC = () => {
             element={
               <ProtectedRoute>
                 <GroupCreatingPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/messages"
+            element={
+              <ProtectedRoute>
+                <DirectMessagesPage />
               </ProtectedRoute>
             }
           />
@@ -116,7 +122,6 @@ const App: React.FC = () => {
             }
           />
 
-          {/* Catch all - redirect to login */}
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </Router>

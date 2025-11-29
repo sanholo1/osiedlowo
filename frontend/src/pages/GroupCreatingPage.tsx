@@ -15,6 +15,8 @@ export const GroupCreatingPage: React.FC = () => {
     const [message, setMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
+    const [isRedirecting, setIsRedirecting] = useState(false);
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData({
@@ -60,6 +62,7 @@ export const GroupCreatingPage: React.FC = () => {
 
             if (response.ok) {
                 setMessage('Osiedle zostało utworzone pomyślnie!');
+                setIsRedirecting(true);
                 setTimeout(() => {
                     navigate('/groupslist');
                 }, 2000);
@@ -89,7 +92,7 @@ export const GroupCreatingPage: React.FC = () => {
                         name="name"
                         value={formData.name}
                         onChange={handleInputChange}
-                        disabled={isLoading}
+                        disabled={isLoading || isRedirecting}
                         required
                     />
                 </div>
@@ -100,7 +103,7 @@ export const GroupCreatingPage: React.FC = () => {
                         name="city"
                         value={formData.city}
                         onChange={handleInputChange}
-                        disabled={isLoading}
+                        disabled={isLoading || isRedirecting}
                         required
                     />
                 </div>
@@ -114,7 +117,7 @@ export const GroupCreatingPage: React.FC = () => {
                         value="pub"
                         checked={formData.status === 'pub'}
                         onChange={handleInputChange}
-                        disabled={isLoading}
+                        disabled={isLoading || isRedirecting}
                     />
                     <label>Prywatne</label>
                     <input
@@ -124,7 +127,7 @@ export const GroupCreatingPage: React.FC = () => {
                         value="priv"
                         checked={formData.status === 'priv'}
                         onChange={handleInputChange}
-                        disabled={isLoading}
+                        disabled={isLoading || isRedirecting}
                     />
                 </div>
                 {formData.status === 'priv' && (
@@ -135,13 +138,13 @@ export const GroupCreatingPage: React.FC = () => {
                             name="password"
                             value={formData.password}
                             onChange={handleInputChange}
-                            disabled={isLoading}
+                            disabled={isLoading || isRedirecting}
                             placeholder="Wpisz hasło dla prywatnego osiedla"
                             required={formData.status === 'priv'}
                         />
                     </div>
                 )}
-                <button type="submit" disabled={isLoading}>
+                <button type="submit" disabled={isLoading || isRedirecting}>
                     {isLoading ? 'Tworzenie...' : 'Stwórz'}
                 </button>
             </form>
@@ -150,9 +153,16 @@ export const GroupCreatingPage: React.FC = () => {
                     {message}
                 </div>
             )}
+
+            {isRedirecting && (
+                <div className="progress-bar-container">
+                    <div className="progress-bar-fill"></div>
+                </div>
+            )}
+
             <button
                 onClick={() => navigate('/home')}
-                disabled={isLoading}
+                disabled={isLoading || isRedirecting}
                 className="back-button"
             >
                 Powrót do strony głównej

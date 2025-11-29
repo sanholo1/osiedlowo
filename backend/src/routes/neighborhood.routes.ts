@@ -17,6 +17,10 @@ router.post('/:id/join', neighborhoodController.joinNeighborhood);
 
 router.post('/:id/leave', neighborhoodController.leaveNeighborhood);
 
+router.post('/join-by-code', neighborhoodController.joinByInviteCode);
+
+router.patch('/:id/password', neighborhoodController.updatePassword);
+
 router.delete('/:id', neighborhoodController.deleteNeighborhood);
 
 export default router;

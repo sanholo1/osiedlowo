@@ -21,6 +21,9 @@ export class NeighborhoodController {
             if (mode === 'my') {
                 console.log('Fetching user neighborhoods');
                 neighborhoods = await this.neighborhoodService.getUserNeighborhoods(userId);
+            } else if (mode === 'public') {
+                console.log('Fetching public neighborhoods');
+                neighborhoods = await this.neighborhoodService.getPublicNeighborhoods(userId);
             } else if (q) {
                 console.log('Searching neighborhoods:', q);
                 neighborhoods = await this.neighborhoodService.searchNeighborhoods(q as string, userId);
@@ -110,6 +113,42 @@ export class NeighborhoodController {
 
             await this.neighborhoodService.deleteNeighborhood(id, userId);
             res.json({ message: 'Sąsiedztwo zostało usunięte' });
+        } catch (error: any) {
+            res.status(400).json({ message: error.message });
+        }
+    };
+
+    joinByInviteCode = async (req: AuthenticatedRequest, res: Response) => {
+        try {
+            const { inviteCode, password } = req.body;
+            const userId = req.user!.userId;
+
+            if (!inviteCode) {
+                return res.status(400).json({ message: 'Kod zaproszenia jest wymagany' });
+            }
+
+            await this.neighborhoodService.joinByInviteCode(inviteCode, userId, password);
+            res.json({ message: 'Dołączono do sąsiedztwa' });
+        } catch (error: any) {
+            if (error.message === 'Wymagane hasło') {
+                return res.status(403).json({ message: 'Wymagane hasło', code: 'PASSWORD_REQUIRED' });
+            }
+            res.status(400).json({ message: error.message });
+        }
+    };
+
+    updatePassword = async (req: AuthenticatedRequest, res: Response) => {
+        try {
+            const { id } = req.params;
+            const { newPassword } = req.body;
+            const userId = req.user!.userId;
+
+            if (!newPassword) {
+                return res.status(400).json({ message: 'Nowe hasło jest wymagane' });
+            }
+
+            await this.neighborhoodService.updatePassword(id, userId, newPassword);
+            res.json({ message: 'Hasło zostało zaktualizowane' });
         } catch (error: any) {
             res.status(400).json({ message: error.message });
         }

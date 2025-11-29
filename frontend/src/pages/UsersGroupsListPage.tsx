@@ -63,13 +63,15 @@ export const UsersGroupsListPage: React.FC = () => {
 
             <main>
                 {neighborhoods.map((neighborhood) => (
-                    <div key={neighborhood.id}>
+                    <div key={neighborhood.id} style={{ marginBottom: '15px', padding: '15px', border: '1px solid #ddd', borderRadius: '8px' }}>
                         <h3>{neighborhood.name}</h3>
                         <p>Miasto: {neighborhood.city}</p>
                         <p>Status: {neighborhood.isPrivate ? 'Prywatne 🔒' : 'Publiczne 🌍'}</p>
-                        <button onClick={() => navigate(`/group?id=${neighborhood.id}`)}>
-                            Wybierz
-                        </button>
+                        <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                            <button onClick={() => navigate(`/group?id=${neighborhood.id}`)}>
+                                Wybierz
+                            </button>
+                        </div>
                     </div>
                 ))}
             </main>

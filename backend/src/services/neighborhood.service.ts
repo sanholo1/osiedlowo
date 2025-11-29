@@ -25,6 +25,10 @@ export class NeighborhoodService {
         return this.neighborhoodRepository.search(query, userId);
     }
 
+    async getPublicNeighborhoods(userId?: string): Promise<Neighborhood[]> {
+        return this.neighborhoodRepository.findPublic(userId);
+    }
+
     async getNeighborhoodById(id: string): Promise<Neighborhood | null> {
         return this.neighborhoodRepository.findById(id);
     }
@@ -36,9 +40,19 @@ export class NeighborhoodService {
         isPrivate?: boolean;
         password?: string;
     }): Promise<Neighborhood> {
+        const existingNeighborhood = await this.neighborhoodRepository.findByName(data.name);
+        if (existingNeighborhood) {
+            throw new Error('Osiedle o tej nazwie już istnieje');
+        }
+
         let hashedPassword: string | undefined;
-        if (data.isPrivate && data.password) {
-            hashedPassword = await bcrypt.hash(data.password, 10);
+        let inviteCode: string | undefined;
+
+        if (data.isPrivate) {
+            if (data.password) {
+                hashedPassword = await bcrypt.hash(data.password, 10);
+            }
+            inviteCode = Math.random().toString(36).substring(2, 8).toUpperCase();
         }
 
         const neighborhood = await this.neighborhoodRepository.create({
@@ -46,7 +60,8 @@ export class NeighborhoodService {
             city: data.city,
             adminId: data.adminId,
             isPrivate: data.isPrivate || false,
-            password: hashedPassword
+            password: hashedPassword,
+            inviteCode: inviteCode
         });
 
         await this.neighborhoodRepository.addMember(neighborhood.id, data.adminId);
@@ -78,6 +93,30 @@ export class NeighborhoodService {
             }
         }
 
+        await this.addMemberToNeighborhood(neighborhoodId, userId);
+    }
+
+    async joinByInviteCode(inviteCode: string, userId: string, password?: string): Promise<void> {
+        const neighborhood = await this.neighborhoodRepository.findByInviteCode(inviteCode);
+        if (!neighborhood) {
+            throw new Error('Nieprawidłowy kod zaproszenia');
+        }
+
+        if (neighborhood.isPrivate && neighborhood.password) {
+            if (!password) {
+                throw new Error('Wymagane hasło');
+            }
+
+            const isPasswordValid = await bcrypt.compare(password, neighborhood.password);
+            if (!isPasswordValid) {
+                throw new Error('Nieprawidłowe hasło');
+            }
+        }
+
+        await this.addMemberToNeighborhood(neighborhood.id, userId);
+    }
+
+    private async addMemberToNeighborhood(neighborhoodId: string, userId: string): Promise<void> {
         const isMember = await this.neighborhoodRepository.isMember(neighborhoodId, userId);
         if (isMember) {
             throw new Error('Już jesteś członkiem tego sąsiedztwa');
@@ -112,6 +151,25 @@ export class NeighborhoodService {
         if (conversation) {
             await this.conversationRepository.removeParticipant(conversation.id, userId);
         }
+    }
+
+    async updatePassword(neighborhoodId: string, userId: string, newPassword: string): Promise<void> {
+        const neighborhood = await this.neighborhoodRepository.findById(neighborhoodId);
+        if (!neighborhood) {
+            throw new Error('Sąsiedztwo nie istnieje');
+        }
+
+        if (neighborhood.adminId !== userId) {
+            throw new Error('Tylko administrator może zmienić hasło');
+        }
+
+        if (!neighborhood.isPrivate) {
+            throw new Error('Można zmienić hasło tylko dla prywatnego osiedla');
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        await this.neighborhoodRepository.update(neighborhoodId, { password: hashedPassword });
     }
 
     async deleteNeighborhood(neighborhoodId: string, userId: string): Promise<void> {

@@ -23,12 +23,19 @@ export class NeighborhoodRepository {
         });
     }
 
+    async findByName(name: string): Promise<Neighborhood | null> {
+        return this.repository.findOne({
+            where: { name }
+        });
+    }
+
     async create(data: {
         name: string;
         city: string;
         adminId: string;
         isPrivate?: boolean;
         password?: string;
+        inviteCode?: string;
     }): Promise<Neighborhood> {
         const result = await this.repository
             .createQueryBuilder()
@@ -39,12 +46,20 @@ export class NeighborhoodRepository {
                 city: data.city,
                 adminId: data.adminId,
                 isPrivate: data.isPrivate,
-                password: data.password
+                password: data.password,
+                inviteCode: data.inviteCode
             })
             .execute();
 
         const id = result.identifiers[0].id;
         return this.findById(id) as Promise<Neighborhood>;
+    }
+
+    async findByInviteCode(inviteCode: string): Promise<Neighborhood | null> {
+        return this.repository.findOne({
+            where: { inviteCode },
+            relations: ['admin', 'members']
+        });
     }
 
     async addMember(neighborhoodId: string, userId: string): Promise<void> {
@@ -73,6 +88,10 @@ export class NeighborhoodRepository {
         return !!neighborhood;
     }
 
+    async update(id: string, data: Partial<Neighborhood>): Promise<void> {
+        await this.repository.update(id, data);
+    }
+
     async delete(id: string): Promise<void> {
         await this.repository.delete(id);
     }
@@ -93,6 +112,28 @@ export class NeighborhoodRepository {
             .leftJoinAndSelect('neighborhood.members', 'members')
             .leftJoinAndSelect('neighborhood.admin', 'admin')
             .where('(LOWER(neighborhood.name) LIKE LOWER(:query) OR LOWER(neighborhood.city) LIKE LOWER(:query))', { query: `%${query}%` });
+
+        if (excludeUserId) {
+            qb.andWhere(qb => {
+                const subQuery = qb.subQuery()
+                    .select('1')
+                    .from('neighborhood_members', 'nm')
+                    .where('nm.neighborhood_id = neighborhood.id')
+                    .andWhere('nm.user_id = :excludeUserId')
+                    .getQuery();
+                return 'NOT EXISTS ' + subQuery;
+            })
+                .setParameter('excludeUserId', excludeUserId);
+        }
+
+        return qb.orderBy('neighborhood.createdAt', 'DESC').getMany();
+    }
+
+    async findPublic(excludeUserId?: string): Promise<Neighborhood[]> {
+        const qb = this.repository.createQueryBuilder('neighborhood')
+            .leftJoinAndSelect('neighborhood.admin', 'admin')
+            .leftJoinAndSelect('neighborhood.members', 'members')
+            .where('neighborhood.isPrivate = :isPrivate', { isPrivate: false });
 
         if (excludeUserId) {
             qb.andWhere(qb => {

@@ -32,7 +32,7 @@ export const HomePage: React.FC = () => {
                     <p className="profile-short-data">Email: {user.email}</p>
                     <p className="profile-short-data">Imię: {user.firstName}</p>
                     <p className="profile-short-data">Nazwisko: {user.lastName}</p>
-                    {user.address && <p className="profile-short-data">Adres: {user.address}</p>} 
+                    {user.address && <p className="profile-short-data">Adres: {user.address}</p>}
                     <button onClick={() => navigate('/profile')}>Zarządzaj profilem</button>
                 </div>
 
@@ -46,6 +46,12 @@ export const HomePage: React.FC = () => {
                     <h3>Przeglądaj Osiedla</h3>
                     <p>Przeglądaj listę osiedli do których możesz dołączyć</p>
                     <button onClick={() => navigate('/search')}>Przeglądaj osiedla</button>
+                </div>
+
+                <div>
+                    <h3>Wiadomości</h3>
+                    <p>Rozmawiaj prywatnie z innymi użytkownikami</p>
+                    <button onClick={() => navigate('/messages')}>Otwórz czat</button>
                 </div>
 
                 <div>
