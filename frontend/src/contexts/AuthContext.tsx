@@ -34,10 +34,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setUser(user);
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));
-            setMessage('Zalogowano pomyślnie!');
+            setMessage('auth_login_success');
             return true;
         } catch (error: any) {
-            setMessage(error.response?.data?.message || 'Błąd logowania');
+            setMessage(error.response?.data?.message || 'auth_login_error_general');
             return false;
         } finally {
             setIsLoading(false);
@@ -48,12 +48,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsLoading(true);
         try {
             await authService.register(data);
-            setMessage('Zarejestrowano pomyślnie! Możesz się teraz zalogować.');
+            setMessage('auth_register_success');
             return true;
         } catch (error: any) {
             const errorMessage = error.response?.data?.errors
                 ? error.response.data.errors.join(', ')
-                : error.response?.data?.message || 'Błąd rejestracji';
+                : error.response?.data?.message || 'auth_register_error_general';
             setMessage(errorMessage);
             return false;
         } finally {
@@ -67,7 +67,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.removeItem('user');
         setToken(null);
         setUser(null);
-        setMessage('Wylogowano');
+        setMessage('auth_logout_success');
     };
 
     const updateUser = (userData: Partial<User>) => {

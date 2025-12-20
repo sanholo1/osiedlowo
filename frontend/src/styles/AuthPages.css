@@ -136,7 +136,7 @@
 }
 
 .auth-footer p {
-    color: #666;
+    color: var(--white-blue);
     font-size: 0.95rem;
 }
 

@@ -1,16 +1,66 @@
 @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap');
+
 :root {
+    
     --white: #FFFFFF;
     --white-blue: #BDD2FA;
     --light-blue: #5E92F2;
     --button-hovers: #7092ce;
     --blue: #1257D9;
     --dark-blue: #0D2249;
-    --borders: 1px solid #e2e2e2;
+
+    
+    --bg-color: linear-gradient(90deg, rgba(2, 0, 36, 1) 0%, rgba(9, 9, 121, 1) 35%, rgba(26, 168, 196, 1) 100%);
+
+    
+    --surface-bg: #FFFFFF;
+    
+
+    
+    --card-bg: #0D2249;
+    
+    --card-text: #BDD2FA;
+    
+
+    --text-color: #0D2249;
+    
+    --text-secondary: #0D2249;
+    --border-color: #e2e2e2;
+
+    --input-bg: #BDD2FA;
+    --button-bg: #BDD2FA;
+    --button-text: #000;
+    --link-color: #1257D9;
+
+    --borders: 1px solid var(--border-color);
     --bradius: 10px;
     --bshadow: 0 2px 2px 1px rgba(0, 0, 0, 0.6);
-    --gradient: linear-gradient(90deg, rgba(2, 0, 36, 1) 0%, rgba(9, 9, 121, 1) 35%, rgba(26, 168, 196, 1) 100%);
     --button-padd: 10px 20px;
+}
+
+body.dark-mode {
+    
+    --bg-color: #121212;
+    
+    --surface-bg: #1e1e1e;
+    
+    --text-color: #BDD2FA;
+    
+
+    
+    --card-bg: #0D2249;
+    
+    --card-text: #BDD2FA;
+    
+
+    --text-secondary: #a0a0a0;
+    --border-color: #333333;
+    --input-bg: #2d2d2d;
+    --button-bg: #5E92F2;
+    --button-text: #fff;
+    --link-color: #5E92F2;
+
+    --button-hovers: #4a7bc7;
 }
 
 html {
@@ -26,27 +76,17 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: #020024;
-    background: var(--gradient);
+    background: var(--bg-color);
     min-height: 100vh;
     overflow-x: hidden;
-}
-
-#container-log-reg a {
-    color: var(--blue);
-    text-decoration-line: none;
-}
-
-#container-log-reg a:hover {
-    color: var(--dark-blue);
-    text-decoration-line: underline;
-    text-decoration-color: var(--dark-blue);
+    color: var(--text-color);
 }
 
 #container-log-reg {
     border: var(--borders);
     border-radius: var(--bradius);
-    background-color: var(--white);
+    background-color: var(--surface-bg);
+    
     padding: 10px;
     display: flex;
     flex-direction: column;
@@ -54,6 +94,17 @@ body {
     align-items: center;
     min-width: 768px;
     min-height: 60vh;
+    color: var(--text-color);
+}
+
+#container-log-reg a {
+    color: var(--link-color);
+    text-decoration-line: none;
+}
+
+#container-log-reg a:hover {
+    color: var(--button-hovers);
+    text-decoration-line: underline;
 }
 
 #container-log-reg form {
@@ -69,10 +120,9 @@ body {
     align-items: center;
     min-width: 200px;
     justify-content: center
-
 }
 
-#container-log-reg form #in-form > div {
+#container-log-reg form #in-form>div {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -85,13 +135,16 @@ body {
 }
 
 button {
-    background-color: var(--white-blue);
+    background-color: var(--button-bg);
+    color: var(--button-text);
     border-radius: var(--bradius);
     padding: var(--button-padd);
     box-shadow: var(--bshadow);
     font-family: 'Quicksand', sans-serif;
     font-weight: bold;
     transition: 0.2s ease-in-out;
+    border: none;
+    cursor: pointer;
 }
 
 button:hover {
@@ -100,7 +153,10 @@ button:hover {
 
 #container-log-reg form input {
     margin-left: 10px;
-    background-color: var(--white-blue);
+    background-color: var(--input-bg);
+    
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
     border-radius: var(--bradius);
     padding: 10px;
     box-shadow: var(--bshadow);
@@ -109,6 +165,7 @@ button:hover {
 
 #container-log-reg form label {
     font-weight: bold;
+    color: var(--text-color);
 }
 
 .home-container {
@@ -118,6 +175,8 @@ button:hover {
     align-items: center;
     min-height: 100vh;
     width: 100%;
+    color: var(--text-color);
+    
 }
 
 nav {
@@ -126,18 +185,20 @@ nav {
     justify-content: space-evenly;
     align-items: center;
     width: 100%;
-    background-color: var(--white);
+    background-color: var(--surface-bg);
+    
     border: var(--borders);
     padding: 20px;
 }
 
-nav > div {
+nav>div {
     min-width: 200px;
     text-align: center;
 }
 
 nav h1 {
     margin: 0;
+    color: var(--text-color);
 }
 
 main {
@@ -147,7 +208,7 @@ main {
     justify-content: space-evenly;
 }
 
-main > * {
+main>* {
     border: var(--borders);
     display: flex;
     flex-direction: column;
@@ -158,33 +219,27 @@ main > * {
     width: 30%;
     margin-bottom: 20px;
     border-radius: var(--bradius);
-    background-color: var(--dark-blue);
+    background-color: var(--card-bg);
+    
     box-shadow: var(--bshadow);
     padding: 20px 10px;
-    color: var(--white-blue);
-}
-
-.home-container main {
-    color: var(--white-blue);
+    color: var(--card-text);
+    
 }
 
 .home-container h2 {
-    color: var(--white-blue);
+    color: var(--text-color);
 }
 
 .home-container p {
     color: var(--white-blue);
 }
 
-.profile-short-data {
-    margin: 8px 0;
-}
-
 .home-container table {
     border-collapse: collapse;
     border: var(--borders);
-    color: var(--white-blue);
-    background-color: var(--dark-blue);
+    color: var(--text-color);
+    background-color: var(--container-bg);
 }
 
 .home-container table th {
@@ -197,5 +252,80 @@ main > * {
 
 h1 {
     text-align: center;
+    color: var(--text-color);
+}
+
+
+.login-controls {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.theme-toggle-btn {
+    background: var(--button-bg);
+    border: var(--borders);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.2s;
+}
+
+.theme-toggle-btn:hover {
+    transform: scale(1.1);
+    background: var(--button-hovers);
+}
+
+.language-select {
+    background: var(--button-bg);
+    border: var(--borders);
+    border-radius: var(--bradius);
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    color: var(--button-text);
+    font-family: inherit;
+}
+
+.language-select:hover {
+    background: var(--button-hovers);
+}
+
+
+.regulations-page {
+    position: relative;
+    max-width: 900px;
+    text-align: left;
+}
+
+.regulations-content {
+    text-align: left;
+    width: 100%;
+    padding: 0 20px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.regulations-content section {
+    margin-bottom: 20px;
+}
+
+.regulations-content h2 {
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+    color: var(--link-color);
+}
+
+.regulations-content p {
+    font-size: 0.95rem;
+    line-height: 1.6;
     color: var(--white-blue);
 }

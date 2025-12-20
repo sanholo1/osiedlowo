@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useSettings } from '../contexts/SettingsContext';
 import '../styles/UsersGroupsListPage.css';
 
 interface Neighborhood {
@@ -15,6 +16,7 @@ interface Neighborhood {
 export const SearchForGroupPage: React.FC = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
+    const { t } = useSettings();
     const [neighborhoods, setNeighborhoods] = useState<Neighborhood[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
@@ -36,10 +38,10 @@ export const SearchForGroupPage: React.FC = () => {
                 const data = await response.json();
                 setNeighborhoods(data);
             } else {
-                setError('Nie udało się pobrać listy osiedli');
+                setError(t('neigh_list_error_fetch'));
             }
         } catch (err) {
-            setError('Błąd połączenia z serwerem');
+            setError(t('common_connection_error'));
         } finally {
             setIsLoading(false);
         }
@@ -61,16 +63,16 @@ export const SearchForGroupPage: React.FC = () => {
                 setNeighborhoods(prev => prev.filter(n => n.id !== neighborhoodId));
             } else {
                 const data = await response.json();
-                alert(data.message || 'Nie udało się dołączyć do osiedla');
+                alert(data.message || t('search_join_error'));
             }
         } catch (err) {
             console.error('Error joining neighborhood:', err);
-            alert('Błąd połączenia z serwerem');
+            alert(t('common_connection_error'));
         }
     };
 
     const handleJoinByCode = async () => {
-        const code = prompt('Wprowadź kod zaproszenia:');
+        const code = prompt(t('search_code_prompt'));
         if (!code) return;
 
         const joinWithPassword = async (password?: string) => {
@@ -86,22 +88,22 @@ export const SearchForGroupPage: React.FC = () => {
                 });
 
                 if (response.ok) {
-                    alert('Pomyślnie dołączono do osiedla!');
+                    alert(t('search_join_success'));
                     navigate('/groupslist');
                 } else {
                     const data = await response.json();
                     if (data.code === 'PASSWORD_REQUIRED') {
-                        const pass = prompt('To osiedle jest prywatne. Wprowadź hasło:');
+                        const pass = prompt(t('search_password_prompt'));
                         if (pass) {
                             await joinWithPassword(pass);
                         }
                     } else {
-                        alert(data.message || 'Nie udało się dołączyć do osiedla');
+                        alert(data.message || t('search_join_error'));
                     }
                 }
             } catch (err) {
                 console.error('Error joining by code:', err);
-                alert('Błąd połączenia z serwerem');
+                alert(t('common_connection_error'));
             }
         };
 
@@ -125,11 +127,11 @@ export const SearchForGroupPage: React.FC = () => {
         <div className="home-container">
             <div className="groups-list-navigation" style={{ marginBottom: '20px', textAlign: 'left' }}>
                 <button onClick={() => navigate('/home')}>
-                    Powrót do strony głównej
+                    {t('back_home')}
                 </button>
             </div>
 
-            <h2>Publiczne osiedla</h2>
+            <h2>{t('search_title')}</h2>
 
             <div style={{ marginBottom: '20px', textAlign: 'center' }}>
                 <button
@@ -144,33 +146,33 @@ export const SearchForGroupPage: React.FC = () => {
                         fontSize: '16px'
                     }}
                 >
-                    Dołącz do prywatnego osiedla kodem
+                    {t('search_join_by_code_btn')}
                 </button>
             </div>
 
             <div style={{ marginBottom: '20px', display: 'flex', gap: '10px', justifyContent: 'center' }}>
                 <input
                     type="text"
-                    placeholder="Filtruj po nazwie"
+                    placeholder={t('search_filter_name')}
                     value={nameFilter}
                     onChange={(e) => setNameFilter(e.target.value)}
                     style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
                 />
                 <input
                     type="text"
-                    placeholder="Filtruj po mieście"
+                    placeholder={t('search_filter_city')}
                     value={cityFilter}
                     onChange={(e) => setCityFilter(e.target.value)}
                     style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
                 />
             </div>
 
-            {isLoading && <p>Ładowanie...</p>}
+            {isLoading && <p>{t('common_loading')}</p>}
 
             {error && <p className="groups-list-error">{error}</p>}
 
             {!isLoading && filteredNeighborhoods.length === 0 && (
-                <p>Brak publicznych osiedli spełniających kryteria.</p>
+                <p>{t('search_empty')}</p>
             )}
 
             <main style={{ flexDirection: 'column', alignItems: 'stretch', width: '100%', maxWidth: '800px' }}>
@@ -190,7 +192,7 @@ export const SearchForGroupPage: React.FC = () => {
                     }}>
                         <div>
                             <h3 style={{ margin: '0 0 5px 0', color: '#333' }}>{neighborhood.name}</h3>
-                            <p style={{ margin: '0', color: '#666' }}>Miasto: {neighborhood.city}</p>
+                            <p style={{ margin: '0', color: '#666' }}>{t('neigh_city')}: {neighborhood.city}</p>
                         </div>
                         <button
                             onClick={() => handleJoin(neighborhood.id)}
@@ -205,7 +207,7 @@ export const SearchForGroupPage: React.FC = () => {
                                 transition: 'background-color 0.2s'
                             }}
                         >
-                            Dołącz
+                            {t('search_join_btn')}
                         </button>
                     </div>
                 ))}

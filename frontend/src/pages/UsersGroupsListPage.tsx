@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useSettings } from '../contexts/SettingsContext';
 import '../styles/UsersGroupsListPage.css';
 
 interface Neighborhood {
@@ -15,6 +16,7 @@ interface Neighborhood {
 export const UsersGroupsListPage: React.FC = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
+    const { t } = useSettings();
     const [neighborhoods, setNeighborhoods] = useState<Neighborhood[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
@@ -36,10 +38,10 @@ export const UsersGroupsListPage: React.FC = () => {
                 const data = await response.json();
                 setNeighborhoods(data);
             } else {
-                setError('Nie udało się pobrać listy osiedli');
+                setError(t('neigh_list_error_fetch'));
             }
         } catch (err) {
-            setError('Błąd połączenia z serwerem');
+            setError(t('common_connection_error'));
         } finally {
             setIsLoading(false);
         }
@@ -51,25 +53,25 @@ export const UsersGroupsListPage: React.FC = () => {
 
     return (
         <div className="home-container">
-            <h2>Twoje osiedla</h2>
+            <h2>{t('neigh_list_title')}</h2>
 
-            {isLoading && <p>Ładowanie...</p>}
+            {isLoading && <p>{t('common_loading')}</p>}
 
             {error && <p className="groups-list-error">{error}</p>}
 
             {!isLoading && neighborhoods.length === 0 && (
-                <p>Nie należysz jeszcze do żadnego osiedla. Stwórz nowe lub dołącz do istniejącego!</p>
+                <p>{t('neigh_list_empty')}</p>
             )}
 
             <main>
                 {neighborhoods.map((neighborhood) => (
                     <div key={neighborhood.id} style={{ marginBottom: '15px', padding: '15px', border: '1px solid #ddd', borderRadius: '8px' }}>
                         <h3>{neighborhood.name}</h3>
-                        <p>Miasto: {neighborhood.city}</p>
-                        <p>Status: {neighborhood.isPrivate ? 'Prywatne 🔒' : 'Publiczne 🌍'}</p>
+                        <p>{t('neigh_city')}: {neighborhood.city}</p>
+                        <p>{t('neigh_status')}: {neighborhood.isPrivate ? t('neigh_status_private') : t('neigh_status_public')}</p>
                         <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
                             <button onClick={() => navigate(`/group?id=${neighborhood.id}`)}>
-                                Wybierz
+                                {t('neigh_select_btn')}
                             </button>
                         </div>
                     </div>
@@ -78,7 +80,7 @@ export const UsersGroupsListPage: React.FC = () => {
 
             <div className="groups-list-navigation">
                 <button onClick={() => navigate('/home')}>
-                    Powrót do strony głównej
+                    {t('back_home')}
                 </button>
             </div>
         </div>

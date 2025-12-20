@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Chat } from '../components/Chat';
+import { useSettings } from '../contexts/SettingsContext';
 import '../styles/UsersGroupsListPage.css';
 
 interface User {
@@ -21,18 +22,31 @@ interface Conversation {
 
 export const DirectMessagesPage: React.FC = () => {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const { user } = useAuth();
+    const { t } = useSettings();
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState<User[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState('');
 
     useEffect(() => {
         fetchConversations();
     }, []);
 
+    
+    useEffect(() => {
+        const targetUserId = searchParams.get('userId');
+        if (targetUserId && !isLoading) {
+            startConversation(targetUserId);
+            
+            navigate('/messages', { replace: true });
+        }
+        
+    }, [searchParams, isLoading]);
+
+    
     useEffect(() => {
         if (searchQuery.length >= 2) {
             handleSearch();
@@ -54,11 +68,9 @@ export const DirectMessagesPage: React.FC = () => {
                 const data = await response.json();
                 const privateConversations = data.filter((c: Conversation) => c.type === 'private');
                 setConversations(privateConversations);
-            } else {
-                setError('Nie udało się pobrać rozmów');
             }
         } catch (err) {
-            setError('Błąd połączenia z serwerem');
+            console.error('Error fetching conversations:', err);
         } finally {
             setIsLoading(false);
         }
@@ -99,6 +111,18 @@ export const DirectMessagesPage: React.FC = () => {
 
             if (response.ok) {
                 const conversation = await response.json();
+
+                
+                if (!conversation.participants || conversation.participants.length === 0) {
+                    const otherUser = searchResults.find(u => u.id === otherUserId);
+                    if (otherUser && user) {
+                        conversation.participants = [
+                            { id: user.id, firstName: user.firstName, lastName: user.lastName, email: user.email },
+                            otherUser
+                        ];
+                    }
+                }
+
                 if (!conversations.find(c => c.id === conversation.id)) {
                     setConversations(prev => [conversation, ...prev]);
                 }
@@ -106,16 +130,50 @@ export const DirectMessagesPage: React.FC = () => {
                 setSearchQuery('');
                 setSearchResults([]);
             } else {
-                alert('Nie udało się rozpocząć rozmowy');
+                const errorData = await response.json().catch(() => ({}));
+                const errorMessage = errorData.message || response.statusText;
+                console.error('Failed to start conversation:', response.status, errorData);
+                alert(`${t('chat_start_error')}: ${errorMessage} (${response.status})`);
             }
         } catch (err) {
             console.error('Error starting conversation:', err);
-            alert('Błąd połączenia z serwerem');
+            alert(t('common_connection_error'));
         }
     };
 
     const getOtherParticipant = (conversation: Conversation) => {
+        if (!conversation.participants || conversation.participants.length === 0) {
+            return undefined;
+        }
         return conversation.participants.find(p => p.id !== user?.id);
+    };
+
+    const handleDeleteConversation = async (conversationId: string) => {
+        if (!window.confirm(t('chat_delete_confirm'))) {
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`http://localhost:3001/api/chat/conversations/${conversationId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                setConversations(prev => prev.filter(c => c.id !== conversationId));
+                if (selectedConversationId === conversationId) {
+                    setSelectedConversationId(null);
+                }
+            } else {
+                alert(t('chat_delete_error'));
+            }
+        } catch (err) {
+            console.error('Error deleting conversation:', err);
+            alert(t('common_connection_error'));
+        }
     };
 
     const handleBack = () => {
@@ -137,29 +195,52 @@ export const DirectMessagesPage: React.FC = () => {
                 borderBottom: '1px solid #ddd',
                 display: 'flex',
                 alignItems: 'center',
+                justifyContent: 'space-between',
                 height: '60px',
                 position: 'sticky',
                 top: 0,
                 zIndex: 100
             }}>
-                <button
-                    onClick={handleBack}
-                    style={{
-                        marginRight: '20px',
-                        padding: '8px 16px',
-                        backgroundColor: '#e4e6eb',
-                        color: 'black',
-                        border: 'none',
-                        borderRadius: '20px',
-                        cursor: 'pointer',
-                        fontWeight: 'bold'
-                    }}
-                >
-                    &larr; {selectedConversationId ? 'Wróć do listy' : 'Wróć do strony głównej'}
-                </button>
-                <h2 style={{ margin: 0, fontSize: '24px', color: '#050505' }}>
-                    {selectedConversationId ? 'Czat' : 'Wiadomości'}
-                </h2>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <button
+                        onClick={handleBack}
+                        style={{
+                            marginRight: '20px',
+                            padding: '8px 16px',
+                            backgroundColor: '#e4e6eb',
+                            color: 'black',
+                            border: 'none',
+                            borderRadius: '20px',
+                            cursor: 'pointer',
+                            fontWeight: 'bold'
+                        }}
+                    >
+                        &larr; {selectedConversationId ? t('chat_back_to_list') : t('back_home')}
+                    </button>
+                    <h2 style={{ margin: 0, fontSize: '24px', color: '#050505' }}>
+                        {selectedConversationId ? t('chat_title_individual') : t('chat_title_list')}
+                    </h2>
+                </div>
+                {selectedConversationId && (
+                    <button
+                        onClick={() => handleDeleteConversation(selectedConversationId)}
+                        style={{
+                            padding: '8px 16px',
+                            backgroundColor: '#ffebee',
+                            color: '#d32f2f',
+                            border: 'none',
+                            borderRadius: '20px',
+                            cursor: 'pointer',
+                            fontWeight: 'bold',
+                            fontSize: '14px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '5px'
+                        }}
+                    >
+                        🗑️ {t('chat_delete_btn')}
+                    </button>
+                )}
             </div>
 
             <div style={{ width: '100%', maxWidth: '800px', margin: '0 auto', height: 'calc(100vh - 60px)', display: 'flex', flexDirection: 'column' }}>
@@ -174,7 +255,7 @@ export const DirectMessagesPage: React.FC = () => {
                                 type="text"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="Szukaj użytkownika..."
+                                placeholder={t('chat_search_placeholder')}
                                 style={{
                                     width: '100%',
                                     padding: '10px 16px',
@@ -191,7 +272,7 @@ export const DirectMessagesPage: React.FC = () => {
                             {searchQuery.length >= 2 ? (
                                 <div>
                                     <div style={{ padding: '10px 16px', fontSize: '13px', fontWeight: 'bold', color: '#65676b' }}>
-                                        WYNIKI WYSZUKIWANIA
+                                        {t('chat_search_results')}
                                     </div>
                                     {searchResults.map(resultUser => (
                                         <div
@@ -219,16 +300,16 @@ export const DirectMessagesPage: React.FC = () => {
                                     ))}
                                     {searchResults.length === 0 && (
                                         <div style={{ padding: '20px', textAlign: 'center', color: '#65676b' }}>
-                                            Nie znaleziono użytkowników
+                                            {t('chat_no_users_found')}
                                         </div>
                                     )}
                                 </div>
                             ) : (
                                 <div>
-                                    {isLoading && <p style={{ padding: '20px', textAlign: 'center' }}>Ładowanie...</p>}
+                                    {isLoading && <p style={{ padding: '20px', textAlign: 'center' }}>{t('common_loading')}</p>}
                                     {!isLoading && conversations.length === 0 && (
                                         <p style={{ padding: '20px', textAlign: 'center', color: '#65676b' }}>
-                                            Brak wiadomości. Wyszukaj kogoś, aby rozpocząć rozmowę!
+                                            {t('chat_empty_list')}
                                         </p>
                                     )}
                                     {conversations.map(conversation => {
@@ -249,14 +330,14 @@ export const DirectMessagesPage: React.FC = () => {
                                                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                                             >
                                                 <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: '#1877f2', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', fontWeight: 'bold', color: 'white' }}>
-                                                    {otherUser?.firstName[0]}
+                                                    {otherUser?.firstName?.[0] || '?'}
                                                 </div>
                                                 <div style={{ flex: 1 }}>
                                                     <div style={{ fontWeight: 'bold', color: '#050505' }}>
-                                                        {otherUser ? `${otherUser.firstName} ${otherUser.lastName}` : 'Nieznany użytkownik'}
+                                                        {otherUser ? `${otherUser.firstName} ${otherUser.lastName}` : t('chat_unknown_user')}
                                                     </div>
                                                     <div style={{ fontSize: '13px', color: '#65676b' }}>
-                                                        {new Date(conversation.updatedAt).toLocaleDateString()}
+                                                        {new Date(conversation.updatedAt).toLocaleDateString(t('appearance_language') === 'Język' ? 'pl-PL' : 'en-US')}
                                                     </div>
                                                 </div>
                                             </div>

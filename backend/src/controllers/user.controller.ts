@@ -85,7 +85,13 @@ export class UserController {
     try {
       const { id } = req.params;
       const user = await this.userService.findById(id);
-      const responseDto = UserResponseDto.fromEntity(user);
+
+      
+      const { RatingService } = await import('../services/rating.service');
+      const ratingService = new RatingService();
+      const ratingStats = await ratingService.getRatingStats(id);
+
+      const responseDto = UserResponseDto.fromEntity(user, ratingStats);
 
       res.json({
         status: 'OK',
@@ -100,7 +106,13 @@ export class UserController {
     try {
       const userId = (req as any).user.userId;
       const user = await this.userService.findById(userId);
-      const responseDto = UserResponseDto.fromEntity(user);
+
+      
+      const { RatingService } = await import('../services/rating.service');
+      const ratingService = new RatingService();
+      const ratingStats = await ratingService.getRatingStats(userId);
+
+      const responseDto = UserResponseDto.fromEntity(user, ratingStats);
 
       res.json({
         status: 'OK',
@@ -113,7 +125,16 @@ export class UserController {
 
   update = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
+      const userRole = (req as any).user?.role;
       const userId = req.params.id || (req as any).user.userId;
+
+      if (userRole === 'admin') {
+        res.status(403).json({
+          status: 'ERROR',
+          message: 'System Admin nie może edytować profilu. Jest to konto techniczne/serwisowe.'
+        });
+        return;
+      }
 
       const updateUserDto = plainToInstance(UpdateUserDto, req.body);
       const errors = await validate(updateUserDto);
@@ -186,4 +207,52 @@ export class UserController {
       next(error);
     }
   };
+
+  blockUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const userId = (req as any).user.userId;
+      const { blockedUserId } = req.params;
+
+      await this.userService.blockUser(userId, blockedUserId);
+
+      res.json({
+        status: 'OK',
+        message: 'Użytkownik został zablokowany'
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  unblockUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const userId = (req as any).user.userId;
+      const { blockedUserId } = req.params;
+
+      await this.userService.unblockUser(userId, blockedUserId);
+
+      res.json({
+        status: 'OK',
+        message: 'Użytkownik został odblokowany'
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getBlockedUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const userId = (req as any).user.userId;
+
+      const blockedUsers = await this.userService.getBlockedUsers(userId);
+
+      res.json({
+        status: 'OK',
+        data: blockedUsers
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
+

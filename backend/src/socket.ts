@@ -124,6 +124,29 @@ export const initializeSocket = (httpServer: HTTPServer): SocketIOServer => {
             }
         });
 
+        socket.on('delete_message', async (data: { messageId: string }) => {
+            try {
+                const { messageId } = data;
+
+                const token = socket.handshake.auth.token || socket.handshake.headers.authorization?.replace('Bearer ', '');
+                const decoded = jwt.verify(token, appConfig.jwt.secret) as any;
+                const userRole = decoded.role || 'user';
+
+                const result = await chatService.deleteMessage(messageId, userId, userRole);
+
+                io.to(`conversation:${result.conversationId}`).emit('message_deleted', {
+                    messageId,
+                    conversationId: result.conversationId,
+                    deletedBy: userId,
+                });
+
+                console.log(`Message ${messageId} deleted by user ${userId}`);
+            } catch (error: any) {
+                console.error('Error deleting message:', error);
+                socket.emit('error', { message: error.message || 'Błąd usuwania wiadomości' });
+            }
+        });
+
         socket.on('disconnect', () => {
             console.log(`❌ User disconnected: ${userId}`);
         });

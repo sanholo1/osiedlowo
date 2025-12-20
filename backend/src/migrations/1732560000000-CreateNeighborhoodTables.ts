@@ -25,18 +25,18 @@ export class CreateNeighborhoodTables1732560000000 implements MigrationInterface
                         length: '255',
                     },
                     {
-                        name: 'adminId', // Zmieniono na camelCase
+                        name: 'adminId', 
                         type: 'varchar',
                         length: '36',
-                        isNullable: true, // Zmieniono na nullable
+                        isNullable: true, 
                     },
                     {
-                        name: 'createdAt', // Zmieniono na camelCase
+                        name: 'createdAt', 
                         type: 'timestamp',
                         default: 'CURRENT_TIMESTAMP',
                     },
                     {
-                        name: 'updatedAt', // Zmieniono na camelCase
+                        name: 'updatedAt', 
                         type: 'timestamp',
                         default: 'CURRENT_TIMESTAMP',
                         onUpdate: 'CURRENT_TIMESTAMP',
@@ -70,7 +70,7 @@ export class CreateNeighborhoodTables1732560000000 implements MigrationInterface
         await queryRunner.createForeignKey(
             'neighborhoods',
             new TableForeignKey({
-                columnNames: ['adminId'], // Zmieniono na camelCase
+                columnNames: ['adminId'], 
                 referencedColumnNames: ['id'],
                 referencedTableName: 'users',
                 onDelete: 'CASCADE',

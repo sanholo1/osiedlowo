@@ -76,13 +76,15 @@ export class NeighborhoodService {
         return this.neighborhoodRepository.findById(neighborhood.id) as Promise<Neighborhood>;
     }
 
-    async joinNeighborhood(neighborhoodId: string, userId: string, password?: string): Promise<void> {
+    async joinNeighborhood(neighborhoodId: string, userId: string, password?: string, userRole?: string): Promise<void> {
         const neighborhood = await this.neighborhoodRepository.findById(neighborhoodId);
         if (!neighborhood) {
             throw new Error('Sąsiedztwo nie istnieje');
         }
 
-        if (neighborhood.isPrivate) {
+        const isSystemAdmin = userRole === 'admin';
+
+        if (neighborhood.isPrivate && !isSystemAdmin) {
             if (!password) {
                 throw new Error('To osiedle jest prywatne. Wymagane jest hasło.');
             }
@@ -153,6 +155,35 @@ export class NeighborhoodService {
         }
     }
 
+    async removeMember(neighborhoodId: string, adminId: string, memberId: string, userRole?: string): Promise<void> {
+        const neighborhood = await this.neighborhoodRepository.findById(neighborhoodId);
+        if (!neighborhood) {
+            throw new Error('Sąsiedztwo nie istnieje');
+        }
+
+        const isSystemAdmin = userRole === 'admin';
+
+        if (neighborhood.adminId !== adminId && !isSystemAdmin) {
+            throw new Error('Tylko administrator osiedla może usuwać członków');
+        }
+
+        if (neighborhood.adminId === memberId) {
+            throw new Error('Administrator nie może usunąć samego siebie');
+        }
+
+        const isMember = await this.neighborhoodRepository.isMember(neighborhoodId, memberId);
+        if (!isMember) {
+            throw new Error('Użytkownik nie jest członkiem tego sąsiedztwa');
+        }
+
+        await this.neighborhoodRepository.removeMember(neighborhoodId, memberId);
+
+        const conversation = await this.conversationRepository.findByNeighborhoodId(neighborhoodId);
+        if (conversation) {
+            await this.conversationRepository.removeParticipant(conversation.id, memberId);
+        }
+    }
+
     async updatePassword(neighborhoodId: string, userId: string, newPassword: string): Promise<void> {
         const neighborhood = await this.neighborhoodRepository.findById(neighborhoodId);
         if (!neighborhood) {
@@ -172,13 +203,15 @@ export class NeighborhoodService {
         await this.neighborhoodRepository.update(neighborhoodId, { password: hashedPassword });
     }
 
-    async deleteNeighborhood(neighborhoodId: string, userId: string): Promise<void> {
+    async deleteNeighborhood(neighborhoodId: string, userId: string, userRole?: string): Promise<void> {
         const neighborhood = await this.neighborhoodRepository.findById(neighborhoodId);
         if (!neighborhood) {
             throw new Error('Sąsiedztwo nie istnieje');
         }
 
-        if (neighborhood.adminId !== userId) {
+        const isSystemAdmin = userRole === 'admin';
+
+        if (neighborhood.adminId !== userId && !isSystemAdmin) {
             throw new Error('Tylko administrator może usunąć sąsiedztwo');
         }
 
@@ -188,5 +221,23 @@ export class NeighborhoodService {
         }
 
         await this.neighborhoodRepository.delete(neighborhoodId);
+    }
+    async removeMemberAsAdmin(neighborhoodId: string, userId: string): Promise<void> {
+        const neighborhood = await this.neighborhoodRepository.findById(neighborhoodId);
+        if (!neighborhood) {
+            throw new Error('Sąsiedztwo nie istnieje');
+        }
+
+        const isMember = await this.neighborhoodRepository.isMember(neighborhoodId, userId);
+        if (!isMember) {
+            throw new Error('Użytkownik nie jest członkiem tego sąsiedztwa');
+        }
+
+        await this.neighborhoodRepository.removeMember(neighborhoodId, userId);
+
+        const conversation = await this.conversationRepository.findByNeighborhoodId(neighborhoodId);
+        if (conversation) {
+            await this.conversationRepository.removeParticipant(conversation.id, userId);
+        }
     }
 }

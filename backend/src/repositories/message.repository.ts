@@ -9,13 +9,15 @@ export class MessageRepository {
         limit: number = 50,
         offset: number = 0
     ): Promise<Message[]> {
-        return this.repository.find({
+        const messages = await this.repository.find({
             where: { conversationId },
             relations: ['sender'],
             order: { createdAt: 'DESC' },
             take: limit,
             skip: offset,
         });
+
+        return messages.reverse();
     }
 
     async findById(id: string): Promise<Message | null> {
@@ -83,5 +85,10 @@ export class MessageRepository {
             relations: ['sender'],
             order: { createdAt: 'DESC' },
         });
+    }
+
+    async delete(id: string): Promise<boolean> {
+        const result = await this.repository.delete(id);
+        return result.affected !== 0;
     }
 }

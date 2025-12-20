@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Chat } from '../components/Chat';
+import { AnnouncementsSection } from '../components/AnnouncementsSection';
+import { useSettings } from '../contexts/SettingsContext';
 import '../styles/GroupPage.css';
 
 interface Member {
@@ -25,6 +27,7 @@ interface Neighborhood {
 export const GroupPage: React.FC = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
+    const { t } = useSettings();
     const [searchParams] = useSearchParams();
     const neighborhoodId = searchParams.get('id');
 
@@ -33,6 +36,7 @@ export const GroupPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
 
+    
     useEffect(() => {
         if (neighborhoodId) {
             fetchNeighborhoodDetails();
@@ -53,10 +57,10 @@ export const GroupPage: React.FC = () => {
                 const data = await response.json();
                 setNeighborhood(data);
             } else {
-                setError('Nie udało się pobrać danych osiedla');
+                setError(t('neigh_details_error_fetch'));
             }
         } catch (err) {
-            setError('Błąd połączenia z serwerem');
+            setError(t('common_connection_error'));
         } finally {
             setIsLoading(false);
         }
@@ -86,7 +90,7 @@ export const GroupPage: React.FC = () => {
     };
 
     const handleLeave = async () => {
-        if (!neighborhoodId || !window.confirm('Czy na pewno chcesz opuścić to osiedle?')) {
+        if (!neighborhoodId || !window.confirm(t('neigh_leave_confirm'))) {
             return;
         }
 
@@ -104,11 +108,11 @@ export const GroupPage: React.FC = () => {
                 navigate('/groupslist');
             } else {
                 const data = await response.json();
-                alert(data.message || 'Nie udało się opuścić osiedla');
+                alert(data.message || t('neigh_leave_error'));
             }
         } catch (err) {
             console.error('Error leaving neighborhood:', err);
-            alert('Błąd połączenia z serwerem');
+            alert(t('common_connection_error'));
         }
     };
 
@@ -117,7 +121,7 @@ export const GroupPage: React.FC = () => {
 
     const handleChangePassword = async () => {
         if (!newPassword) {
-            alert('Wprowadź nowe hasło');
+            alert(t('neigh_password_prompt'));
             return;
         }
 
@@ -133,20 +137,20 @@ export const GroupPage: React.FC = () => {
             });
 
             if (response.ok) {
-                alert('Hasło zostało zmienione');
+                alert(t('neigh_password_success'));
                 setNewPassword('');
             } else {
                 const data = await response.json();
-                alert(data.message || 'Nie udało się zmienić hasła');
+                alert(data.message || t('neigh_password_error'));
             }
         } catch (err) {
             console.error('Error changing password:', err);
-            alert('Błąd połączenia z serwerem');
+            alert(t('common_connection_error'));
         }
     };
 
     const handleDelete = async () => {
-        if (!neighborhoodId || !window.confirm('Czy na pewno chcesz trwale usunąć to osiedle? Tej operacji nie można cofnąć.')) {
+        if (!neighborhoodId || !window.confirm(t('neigh_delete_confirm'))) {
             return;
         }
 
@@ -163,11 +167,11 @@ export const GroupPage: React.FC = () => {
                 navigate('/groupslist');
             } else {
                 const data = await response.json();
-                alert(data.message || 'Nie udało się usunąć osiedla');
+                alert(data.message || t('neigh_delete_error'));
             }
         } catch (err) {
             console.error('Error deleting neighborhood:', err);
-            alert('Błąd połączenia z serwerem');
+            alert(t('common_connection_error'));
         }
     };
 
@@ -178,7 +182,7 @@ export const GroupPage: React.FC = () => {
     if (isLoading) {
         return (
             <div className="home-container">
-                <p>Ładowanie...</p>
+                <p>{t('common_loading')}</p>
             </div>
         );
     }
@@ -186,25 +190,52 @@ export const GroupPage: React.FC = () => {
     if (error || !neighborhood) {
         return (
             <div className="home-container">
-                <p className="error-message">{error || 'Nie znaleziono osiedla'}</p>
-                <button onClick={() => navigate('/groupslist')}>Powrót do listy osiedli</button>
+                <p className="error-message">{error || t('neigh_not_found')}</p>
+                <button onClick={() => navigate('/groupslist')}>{t('back_to_list')}</button>
             </div>
         );
     }
 
     const isAdmin = neighborhood.adminId === user.id;
 
+    const handleRemoveMember = async (memberId: string) => {
+        if (!window.confirm(t('neigh_remove_member_confirm'))) {
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`http://localhost:3001/api/neighborhoods/${neighborhoodId}/members/${memberId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                // Refresh list
+                fetchNeighborhoodDetails();
+            } else {
+                const data = await response.json();
+                alert(data.message || t('neigh_remove_member_error'));
+            }
+        } catch (err) {
+            console.error('Error removing member:', err);
+            alert(t('common_connection_error'));
+        }
+    };
+
     return (
         <div className="home-container">
             <h2>{neighborhood.name}</h2>
 
             <div className="group-info-section">
-                <h3>Informacje o osiedlu</h3>
-                <p><strong>Miasto:</strong> {neighborhood.city}</p>
-                <p><strong>Status:</strong> {neighborhood.isPrivate ? 'Prywatne 🔒' : 'Publiczne 🌍'}</p>
-                <p><strong>Data utworzenia:</strong> {new Date(neighborhood.createdAt).toLocaleDateString('pl-PL')}</p>
-                <p><strong>Liczba członków:</strong> {neighborhood.members?.length || 0}</p>
-                {isAdmin && <p className="admin-badge">✓ Jesteś administratorem tego osiedla</p>}
+                <h3>{t('neigh_info_section')}</h3>
+                <p><strong>{t('neigh_city')}:</strong> {neighborhood.city}</p>
+                <p><strong>{t('neigh_status')}:</strong> {neighborhood.isPrivate ? t('neigh_status_private') : t('neigh_status_public')}</p>
+                <p><strong>{t('neigh_created_at')}:</strong> {new Date(neighborhood.createdAt).toLocaleDateString(t('appearance_language') === 'Język' ? 'pl-PL' : 'en-US')}</p>
+                <p><strong>{t('neigh_members_count')}:</strong> {neighborhood.members?.length || 0}</p>
+                {isAdmin && <p className="admin-badge">{t('neigh_admin_badge')}</p>}
             </div>
 
             {isAdmin && showManagement && (
@@ -215,20 +246,20 @@ export const GroupPage: React.FC = () => {
                     marginBottom: '20px',
                     border: '1px solid #ffcc80'
                 }}>
-                    <h3>Zarządzanie osiedlem</h3>
-                    <p>Tutaj możesz zarządzać ustawieniami osiedla.</p>
+                    <h3>{t('neigh_mgmt_title')}</h3>
+                    <p>{t('neigh_mgmt_desc')}</p>
 
                     {neighborhood.isPrivate && neighborhood.inviteCode && (
                         <div style={{ margin: '15px 0', padding: '10px', backgroundColor: 'white', borderRadius: '4px', border: '1px dashed #ccc' }}>
-                            <p style={{ margin: '0 0 5px 0', fontWeight: 'bold' }}>Kod zaproszenia:</p>
+                            <p style={{ margin: '0 0 5px 0', fontWeight: 'bold' }}>{t('neigh_invite_code')}:</p>
                             <code style={{ fontSize: '1.2em', color: '#d32f2f' }}>{neighborhood.inviteCode}</code>
-                            <p style={{ fontSize: '0.8em', color: '#666', margin: '5px 0 0 0' }}>Podaj ten kod osobom, które chcesz zaprosić do osiedla.</p>
+                            <p style={{ fontSize: '0.8em', color: '#666', margin: '5px 0 0 0' }}>{t('neigh_invite_desc')}</p>
                         </div>
                     )}
 
                     {neighborhood.isPrivate && (
                         <div style={{ margin: '15px 0', padding: '10px', backgroundColor: 'white', borderRadius: '4px', border: '1px solid #ccc' }}>
-                            <p style={{ margin: '0 0 5px 0', fontWeight: 'bold' }}>Zmień hasło:</p>
+                            <p style={{ margin: '0 0 5px 0', fontWeight: 'bold' }}>{t('neigh_change_password')}:</p>
                             <div style={{ display: 'flex', gap: '10px' }}>
                                 <input
                                     type="password"
@@ -248,7 +279,7 @@ export const GroupPage: React.FC = () => {
                                         padding: '5px 10px'
                                     }}
                                 >
-                                    Zapisz
+                                    {t('common_save')}
                                 </button>
                             </div>
                         </div>
@@ -266,36 +297,63 @@ export const GroupPage: React.FC = () => {
                             marginTop: '10px'
                         }}
                     >
-                        Usuń osiedle trwale
+                        {t('neigh_delete_btn')}
                     </button>
                 </div>
             )}
 
             <div className="members-section">
-                <h3>Członkowie osiedla ({neighborhood.members?.length || 0})</h3>
+                <h3>{t('neigh_members_section')} ({neighborhood.members?.length || 0})</h3>
                 {neighborhood.members && neighborhood.members.length > 0 ? (
                     <ul className="members-list">
                         {neighborhood.members.map((member) => (
-                            <li key={member.id} className="member-item">
-                                <strong>{member.firstName} {member.lastName}</strong>
-                                {member.id === neighborhood.adminId && <span className="member-admin-badge">👑 Administrator</span>}
-                                {member.id === user.id && <span className="member-you-badge">(Ty)</span>}
+                            <li key={member.id} className="member-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div>
+                                    <strong>{member.firstName} {member.lastName}</strong>
+                                    {member.id === neighborhood.adminId && <span className="member-admin-badge">{t('neigh_role_admin')}</span>}
+                                    {member.id === user.id && <span className="member-you-badge">{t('neigh_role_you')}</span>}
+                                </div>
+                                {isAdmin && member.id !== user.id && (
+                                    <button
+                                        onClick={() => handleRemoveMember(member.id)}
+                                        style={{
+                                            backgroundColor: '#ffebee',
+                                            color: '#c62828',
+                                            border: 'none',
+                                            padding: '4px 8px',
+                                            borderRadius: '4px',
+                                            cursor: 'pointer',
+                                            fontSize: '0.9em'
+                                        }}
+                                    >
+                                        {t('neigh_remove_member_btn') || 'Usuń'}
+                                    </button>
+                                )}
                             </li>
                         ))}
                     </ul>
                 ) : (
-                    <p>Brak członków</p>
+                    <p>{t('neigh_no_members')}</p>
                 )}
             </div>
 
+            {/* Announcements Section */}
+            {neighborhoodId && (
+                <AnnouncementsSection
+                    neighborhoodId={neighborhoodId}
+                    userId={user.id}
+                    isAdmin={isAdmin}
+                />
+            )}
+
             <div className="chat-section">
-                <h3>Chat osiedla</h3>
+                <h3>{t('neigh_chat_title')}</h3>
                 <div className="chat-container">
                     {conversationId ? (
                         <Chat conversationId={conversationId} userId={user.id} />
                     ) : (
                         <p className="loading-message">
-                            Ładowanie czatu...
+                            {t('neigh_chat_loading')}
                         </p>
                     )}
                 </div>
@@ -303,17 +361,17 @@ export const GroupPage: React.FC = () => {
 
             <div className="navigation-buttons">
                 <button onClick={() => navigate('/groupslist')}>
-                    Powrót do listy osiedli
+                    {t('back_to_list')}
                 </button>
                 <button onClick={() => navigate('/home')}>
-                    Strona główna
+                    {t('back_home')}
                 </button>
                 {!isAdmin && (
                     <button
                         onClick={handleLeave}
                         style={{ backgroundColor: '#f44336' }}
                     >
-                        Opuść osiedle
+                        {t('neigh_leave_btn')}
                     </button>
                 )}
                 {isAdmin && (
@@ -321,7 +379,7 @@ export const GroupPage: React.FC = () => {
                         className="delete-button"
                         onClick={() => setShowManagement(!showManagement)}
                     >
-                        {showManagement ? 'Ukryj zarządzanie' : 'Zarządzaj osiedlem'}
+                        {showManagement ? t('neigh_mgmt_hide') : t('neigh_mgmt_show')}
                     </button>
                 )}
             </div>

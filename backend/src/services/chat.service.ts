@@ -1,6 +1,7 @@
 import { ConversationRepository } from '@repositories/conversation.repository';
 import { MessageRepository } from '@repositories/message.repository';
 import { UserRepository } from '@repositories/user.repository';
+import { NeighborhoodRepository } from '@repositories/neighborhood.repository';
 import { ConversationType } from '@entities/conversation.entity';
 import { Conversation } from '@entities/conversation.entity';
 import { Message } from '@entities/message.entity';
@@ -17,28 +18,46 @@ export class ChatService {
     private conversationRepository: ConversationRepository;
     private messageRepository: MessageRepository;
     private userRepository: UserRepository;
+    private neighborhoodRepository: NeighborhoodRepository;
 
     constructor() {
         this.conversationRepository = new ConversationRepository();
         this.messageRepository = new MessageRepository();
         this.userRepository = new UserRepository();
+        this.neighborhoodRepository = new NeighborhoodRepository();
     }
 
-    async getOrCreatePrivateConversation(user1Id: string, user2Id: string): Promise<Conversation> {
+    async getOrCreatePrivateConversation(user1Id: string, user2Id: string): Promise<ConversationResponseDto> {
         const existing = await this.conversationRepository.findPrivateConversation(user1Id, user2Id);
-        if (existing) {
-            return existing;
+
+        if (!existing) {
+            const user2 = await this.userRepository.findById(user2Id);
+            if (!user2) {
+                throw new NotFoundException('Użytkownik nie został znaleziony');
+            }
         }
 
-        const user2 = await this.userRepository.findById(user2Id);
-        if (!user2) {
-            throw new NotFoundException('Użytkownik nie został znaleziony');
-        }
-
-        return this.conversationRepository.create({
+        const conversationToTransform = existing || await this.conversationRepository.create({
             type: ConversationType.PRIVATE,
             participantIds: [user1Id, user2Id],
         });
+
+        
+        return {
+            id: conversationToTransform.id,
+            type: conversationToTransform.type,
+            name: conversationToTransform.name,
+            neighborhoodId: conversationToTransform.neighborhoodId,
+            participants: conversationToTransform.participants?.map(p => ({
+                id: p.user?.id || p.userId,
+                username: p.user?.username || p.user?.email || '',
+                firstName: p.user?.firstName || '',
+                lastName: p.user?.lastName || '',
+            })) || [],
+            updatedAt: conversationToTransform.updatedAt,
+            createdAt: conversationToTransform.createdAt,
+            unreadCount: 0,
+        };
     }
 
     async createGroupConversation(
@@ -178,5 +197,54 @@ export class ChatService {
 
     async getConversationByNeighborhoodId(neighborhoodId: string): Promise<Conversation | null> {
         return this.conversationRepository.findByNeighborhoodId(neighborhoodId);
+    }
+    async deleteConversation(conversationId: string, userId: string): Promise<void> {
+        const isParticipant = await this.conversationRepository.isParticipant(conversationId, userId);
+        if (!isParticipant) {
+            throw new ForbiddenException('Nie masz dostępu do tej konwersacji');
+        }
+
+        await this.conversationRepository.delete(conversationId);
+    }
+
+    async deleteMessage(
+        messageId: string,
+        userId: string,
+        userRole: string
+    ): Promise<{ conversationId: string }> {
+        const message = await this.messageRepository.findById(messageId);
+        if (!message) {
+            throw new NotFoundException('Wiadomość nie została znaleziona');
+        }
+
+        const conversation = await this.conversationRepository.findById(message.conversationId);
+        if (!conversation) {
+            throw new NotFoundException('Konwersacja nie została znaleziona');
+        }
+
+        const isSystemAdmin = userRole === 'admin';
+        if (isSystemAdmin) {
+            await this.messageRepository.delete(messageId);
+            return { conversationId: message.conversationId };
+        }
+
+        if (conversation.neighborhoodId) {
+            const neighborhood = await this.neighborhoodRepository.findById(conversation.neighborhoodId);
+            if (neighborhood && neighborhood.adminId === userId) {
+                await this.messageRepository.delete(messageId);
+                return { conversationId: message.conversationId };
+            }
+        }
+
+        throw new ForbiddenException('Nie masz uprawnień do usunięcia tej wiadomości');
+    }
+
+    async getTotalUnreadCount(userId: string): Promise<number> {
+        const conversations = await this.conversationRepository.findByUser(userId);
+        let total = 0;
+        for (const conversation of conversations) {
+            total += await this.messageRepository.getUnreadCount(conversation.id, userId);
+        }
+        return total;
     }
 }

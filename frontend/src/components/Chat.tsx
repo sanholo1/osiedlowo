@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import io, { Socket } from 'socket.io-client';
+import { useSettings } from '../contexts/SettingsContext';
 
 interface Message {
     id: string;
@@ -21,6 +22,7 @@ interface ChatProps {
 export const Chat: React.FC<ChatProps> = ({ conversationId, userId }) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [newMessage, setNewMessage] = useState('');
+    const { t } = useSettings();
     const [socket, setSocket] = useState<Socket | null>(null);
     const [isConnected, setIsConnected] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -60,6 +62,7 @@ export const Chat: React.FC<ChatProps> = ({ conversationId, userId }) => {
         return () => {
             newSocket.disconnect();
         };
+        
     }, [conversationId]);
 
     const loadMessages = async () => {
@@ -115,12 +118,12 @@ export const Chat: React.FC<ChatProps> = ({ conversationId, userId }) => {
             }}>
                 {!isConnected && (
                     <p style={{ textAlign: 'center', color: '#999' }}>
-                        Łączenie z czatem...
+                        {t('chat_connecting')}
                     </p>
                 )}
                 {messages.length === 0 && isConnected && (
                     <p style={{ textAlign: 'center', color: '#999' }}>
-                        Brak wiadomości. Rozpocznij rozmowę!
+                        {t('chat_empty_state')}
                     </p>
                 )}
                 {messages.map((message) => (
@@ -139,13 +142,13 @@ export const Chat: React.FC<ChatProps> = ({ conversationId, userId }) => {
                         <div style={{ fontSize: '0.85em', color: '#666', marginBottom: '4px' }}>
                             <strong>
                                 {message.senderId === userId
-                                    ? 'Ty'
+                                    ? t('chat_you')
                                     : `${message.sender.firstName} ${message.sender.lastName}`}
                             </strong>
                         </div>
                         <div>{message.content}</div>
                         <div style={{ fontSize: '0.75em', color: '#999', marginTop: '4px' }}>
-                            {new Date(message.createdAt).toLocaleTimeString('pl-PL', {
+                            {new Date(message.createdAt).toLocaleTimeString(t('appearance_language') === 'Język' ? 'pl-PL' : 'en-US', {
                                 hour: '2-digit',
                                 minute: '2-digit'
                             })}
@@ -160,12 +163,12 @@ export const Chat: React.FC<ChatProps> = ({ conversationId, userId }) => {
                     type="text"
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Wpisz wiadomość..."
+                    placeholder={t('chat_input_placeholder')}
                     style={{ flex: 1, padding: '8px' }}
                     disabled={!isConnected}
                 />
                 <button type="submit" disabled={!isConnected || !newMessage.trim()}>
-                    Wyślij
+                    {t('chat_send_btn')}
                 </button>
             </form>
         </div>

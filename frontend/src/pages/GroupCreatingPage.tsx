@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useSettings } from '../contexts/SettingsContext';
 import '../styles/GroupCreatingPage.css';
 
 export const GroupCreatingPage: React.FC = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
+    const { t } = useSettings();
     const [formData, setFormData] = useState({
         name: '',
         city: '',
@@ -31,13 +33,13 @@ export const GroupCreatingPage: React.FC = () => {
         setMessage('');
 
         if (!formData.name.trim() || !formData.city.trim()) {
-            setMessage('Nazwa osiedla i miasto są wymagane');
+            setMessage(t('create_neigh_error_required'));
             setIsLoading(false);
             return;
         }
 
         if (formData.status === 'priv' && !formData.password.trim()) {
-            setMessage('Hasło jest wymagane dla prywatnych osiedli');
+            setMessage(t('create_neigh_error_password'));
             setIsLoading(false);
             return;
         }
@@ -61,16 +63,16 @@ export const GroupCreatingPage: React.FC = () => {
             const data = await response.json();
 
             if (response.ok) {
-                setMessage('Osiedle zostało utworzone pomyślnie!');
+                setMessage(t('create_neigh_success'));
                 setIsRedirecting(true);
                 setTimeout(() => {
                     navigate('/groupslist');
                 }, 2000);
             } else {
-                setMessage(data.message || 'Wystąpił błąd podczas tworzenia osiedla');
+                setMessage(data.message || t('create_neigh_error_general'));
             }
         } catch (error) {
-            setMessage('Błąd połączenia z serwerem');
+            setMessage(t('common_connection_error'));
             console.error('Error creating neighborhood:', error);
         } finally {
             setIsLoading(false);
@@ -83,10 +85,10 @@ export const GroupCreatingPage: React.FC = () => {
 
     return (
         <div id="neighbourhood-creating-container">
-            <h2>Stwórz swoje osiedle</h2>
+            <h2>{t('create_neigh_title')}</h2>
             <form onSubmit={handleSubmit}>
                 <div>
-                    <label>Nazwa osiedla: </label>
+                    <label>{t('create_neigh_name_label')}: </label>
                     <input
                         type="text"
                         name="name"
@@ -97,7 +99,7 @@ export const GroupCreatingPage: React.FC = () => {
                     />
                 </div>
                 <div>
-                    <label>Miasto: </label>
+                    <label>{t('create_neigh_city_label')}: </label>
                     <input
                         type="text"
                         name="city"
@@ -108,8 +110,8 @@ export const GroupCreatingPage: React.FC = () => {
                     />
                 </div>
                 <div>
-                    <h3>Status osiedla:</h3>
-                    <label>Publiczne</label>
+                    <h3>{t('create_neigh_status_label')}:</h3>
+                    <label>{t('create_neigh_status_public')}</label>
                     <input
                         type="radio"
                         name="status"
@@ -119,7 +121,7 @@ export const GroupCreatingPage: React.FC = () => {
                         onChange={handleInputChange}
                         disabled={isLoading || isRedirecting}
                     />
-                    <label>Prywatne</label>
+                    <label>{t('create_neigh_status_private')}</label>
                     <input
                         type="radio"
                         name="status"
@@ -132,20 +134,20 @@ export const GroupCreatingPage: React.FC = () => {
                 </div>
                 {formData.status === 'priv' && (
                     <div>
-                        <label>Hasło do osiedla: </label>
+                        <label>{t('create_neigh_password_label')}: </label>
                         <input
                             type="password"
                             name="password"
                             value={formData.password}
                             onChange={handleInputChange}
                             disabled={isLoading || isRedirecting}
-                            placeholder="Wpisz hasło dla prywatnego osiedla"
+                            placeholder={t('create_neigh_password_placeholder')}
                             required={formData.status === 'priv'}
                         />
                     </div>
                 )}
                 <button type="submit" disabled={isLoading || isRedirecting}>
-                    {isLoading ? 'Tworzenie...' : 'Stwórz'}
+                    {isLoading ? t('create_neigh_loading') : t('create_neigh_submit')}
                 </button>
             </form>
             {message && (
@@ -165,7 +167,7 @@ export const GroupCreatingPage: React.FC = () => {
                 disabled={isLoading || isRedirecting}
                 className="back-button"
             >
-                Powrót do strony głównej
+                {t('back_home')}
             </button>
         </div>
     );

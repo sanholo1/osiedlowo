@@ -19,6 +19,10 @@ export class UpdateUserDto {
   address?: string;
 
   @IsOptional()
+  @IsString({ each: true, message: 'Każdy atrybut musi być tekstem' })
+  attributes?: string[];
+
+  @IsOptional()
   @IsBoolean()
   isActive?: boolean;
 }

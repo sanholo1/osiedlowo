@@ -86,8 +86,9 @@ export class NeighborhoodController {
             const { id } = req.params;
             const { password } = req.body;
             const userId = req.user!.userId;
+            const userRole = req.user!.role;
 
-            await this.neighborhoodService.joinNeighborhood(id, userId, password);
+            await this.neighborhoodService.joinNeighborhood(id, userId, password, userRole);
             res.json({ message: 'Dołączono do sąsiedztwa' });
         } catch (error: any) {
             res.status(400).json({ message: error.message });
@@ -106,12 +107,26 @@ export class NeighborhoodController {
         }
     };
 
+    removeMember = async (req: AuthenticatedRequest, res: Response) => {
+        try {
+            const { id, memberId } = req.params;
+            const adminId = req.user!.userId;
+            const userRole = req.user!.role;
+
+            await this.neighborhoodService.removeMember(id, adminId, memberId, userRole);
+            res.json({ message: 'Użytkownik został usunięty z osiedla' });
+        } catch (error: any) {
+            res.status(400).json({ message: error.message });
+        }
+    };
+
     deleteNeighborhood = async (req: AuthenticatedRequest, res: Response) => {
         try {
             const { id } = req.params;
             const userId = req.user!.userId;
+            const userRole = req.user!.role;
 
-            await this.neighborhoodService.deleteNeighborhood(id, userId);
+            await this.neighborhoodService.deleteNeighborhood(id, userId, userRole);
             res.json({ message: 'Sąsiedztwo zostało usunięte' });
         } catch (error: any) {
             res.status(400).json({ message: error.message });

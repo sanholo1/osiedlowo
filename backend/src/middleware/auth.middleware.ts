@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { appConfig } from '@config/app.config';
 import { UnauthorizedException } from '@exceptions';
+import { UserRepository } from '@repositories/user.repository';
 
 export interface AuthenticatedRequest extends Request {
   user?: {
@@ -28,6 +29,13 @@ export const authMiddleware = async (
       email: string;
       role: string;
     };
+
+    const userRepository = new UserRepository();
+    const user = await userRepository.findById(decoded.userId);
+
+    if (!user) {
+      throw new UnauthorizedException('Użytkownik nie istnieje');
+    }
 
     req.user = {
       userId: decoded.userId,

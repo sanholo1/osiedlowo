@@ -23,6 +23,9 @@ export class User {
   @Column({ nullable: true })
   address: string;
 
+  @Column('simple-array', { nullable: true })
+  attributes: string[];
+
   @Column({ default: 'user' })
   role: string;
 
