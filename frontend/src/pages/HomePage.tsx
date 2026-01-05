@@ -75,6 +75,19 @@ export const HomePage: React.FC = () => {
                     <p data-i18n="home_settings_desc">{t('home_settings_desc')}</p>
                     <button onClick={() => navigate('/settings')} data-i18n="home_settings_btn">{t('home_settings_btn')}</button>
                 </div>
+
+                {user.role === 'admin' && (
+                    <div style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)', border: '2px solid #e94560' }}>
+                        <h3 style={{ color: '#e94560' }}>🛡️ Panel Administratora</h3>
+                        <p style={{ color: '#ffffff' }}>Zarządzaj użytkownikami, ogłoszeniami, ocenami i osiedlami.</p>
+                        <button
+                            onClick={() => navigate('/admin')}
+                            style={{ background: 'linear-gradient(135deg, #e94560, #0f3460)', border: 'none' }}
+                        >
+                            Otwórz Panel Admina
+                        </button>
+                    </div>
+                )}
             </main>
 
             <footer>

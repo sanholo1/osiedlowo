@@ -28,7 +28,7 @@ export class AnnouncementService {
         neighborhoodId: string;
         expiresAt?: Date;
     }): Promise<Announcement> {
-        
+
         const isMember = await this.neighborhoodRepository.isMember(data.neighborhoodId, data.authorId);
         if (!isMember) {
             throw new ForbiddenException('Musisz być członkiem osiedla, aby dodać ogłoszenie');
@@ -44,7 +44,7 @@ export class AnnouncementService {
             status: AnnouncementStatus.ACTIVE,
         });
 
-        
+
         const author = await this.userRepository.findById(data.authorId);
         if (author) {
             const authorName = `${author.firstName} ${author.lastName}`;
@@ -73,13 +73,13 @@ export class AnnouncementService {
             authorId?: string;
         }
     ): Promise<Announcement[]> {
-        
+
         const isMember = await this.neighborhoodRepository.isMember(neighborhoodId, userId);
         if (!isMember) {
             throw new ForbiddenException('Musisz być członkiem osiedla, aby zobaczyć ogłoszenia');
         }
 
-        
+
         const queryBuilder = this.announcementRepository.getRepository()
             .createQueryBuilder('announcement')
             .where('announcement.neighborhoodId = :neighborhoodId', { neighborhoodId })
@@ -100,13 +100,13 @@ export class AnnouncementService {
             queryBuilder.andWhere('announcement.authorId = :authorId', { authorId: options.authorId });
         }
 
-        
+
         queryBuilder.orderBy('announcement.isPinned', 'DESC')
             .addOrderBy('announcement.createdAt', 'DESC');
 
         const announcements = await queryBuilder.getMany();
 
-        
+
         const blockedUserRepository = new BlockedUserRepository();
         const blockedUserIds = await blockedUserRepository.getBlockedUserIds(userId);
 
@@ -128,10 +128,10 @@ export class AnnouncementService {
             throw new Error('Tylko administrator osiedla może przypinać ogłoszenia');
         }
 
-        
+
         const isPinned = !announcement.isPinned;
 
-        
+
         await this.announcementRepository.getRepository().update(id, { isPinned });
 
         return this.announcementRepository.findById(id) as Promise<Announcement>;
@@ -178,7 +178,7 @@ export class AnnouncementService {
             throw new Error('Tylko autor może zmienić status ogłoszenia');
         }
 
-        
+
         if (status === AnnouncementStatus.ACTIVE) {
             await this.announcementRepository.clearAcceptedResponse(id);
         }
@@ -199,7 +199,7 @@ export class AnnouncementService {
 
         const neighborhood = await this.neighborhoodRepository.findById(announcement.neighborhoodId);
 
-        
+
         const isAdmin = neighborhood && neighborhood.adminId === userId;
 
         if (announcement.authorId !== userId && !isAdmin) {
@@ -222,18 +222,18 @@ export class AnnouncementService {
             throw new Error('Ogłoszenie nie zostało znalezione');
         }
 
-        
+
         if (announcement.status !== AnnouncementStatus.ACTIVE) {
             throw new Error('Nie można odpowiadać na to ogłoszenie - pomoc jest już w trakcie realizacji');
         }
 
-        
+
         const isMember = await this.neighborhoodRepository.isMember(announcement.neighborhoodId, userId);
         if (!isMember) {
             throw new Error('Musisz być członkiem osiedla');
         }
 
-        
+
         const existingResponse = await this.announcementRepository.findResponseByUserAndAnnouncement(
             userId,
             announcementId
@@ -242,9 +242,15 @@ export class AnnouncementService {
             throw new Error('Już odpowiedziałeś na to ogłoszenie');
         }
 
-        
+
         if (announcement.authorId === userId) {
             throw new Error('Nie możesz odpowiedzieć na własne ogłoszenie');
+        }
+
+        const blockedUserRepository = new BlockedUserRepository();
+        const isBlockedByAuthor = await blockedUserRepository.isBlocked(announcement.authorId, userId);
+        if (isBlockedByAuthor) {
+            throw new Error('Nie możesz odpowiedzieć na ogłoszenie tego użytkownika');
         }
 
         const response = await this.announcementRepository.addResponse({
@@ -253,7 +259,7 @@ export class AnnouncementService {
             message,
         });
 
-        
+
         const responder = await this.userRepository.findById(userId);
         if (responder) {
             const responderName = `${responder.firstName} ${responder.lastName}`;
@@ -284,7 +290,7 @@ export class AnnouncementService {
             throw new Error('Nie znaleziono Twojej odpowiedzi');
         }
 
-        
+
         if (response.isAccepted) {
             throw new Error('Nie możesz wycofać zaakceptowanej oferty');
         }
@@ -292,7 +298,7 @@ export class AnnouncementService {
         await this.announcementRepository.deleteResponse(response.id);
     }
 
-    
+
     async acceptOffer(
         announcementId: string,
         responseId: string,
@@ -321,7 +327,7 @@ export class AnnouncementService {
             throw new Error('Nie udało się zaakceptować oferty');
         }
 
-        
+
         const author = await this.userRepository.findById(userId);
         if (author) {
             const authorName = `${author.firstName} ${author.lastName}`;
@@ -337,14 +343,14 @@ export class AnnouncementService {
         return updated;
     }
 
-    
+
     async recordView(announcementId: string, userId: string): Promise<boolean> {
         const announcement = await this.announcementRepository.findById(announcementId);
         if (!announcement) {
             return false;
         }
 
-        
+
         if (announcement.authorId === userId) {
             return false;
         }
@@ -352,14 +358,14 @@ export class AnnouncementService {
         return this.announcementRepository.recordView(announcementId, userId);
     }
 
-    
+
     async getViewers(announcementId: string, userId: string): Promise<any[]> {
         const announcement = await this.announcementRepository.findById(announcementId);
         if (!announcement) {
             throw new Error('Ogłoszenie nie zostało znalezione');
         }
 
-        
+
         if (announcement.authorId !== userId) {
             throw new Error('Tylko autor może zobaczyć kto wyświetlił ogłoszenie');
         }
@@ -367,7 +373,7 @@ export class AnnouncementService {
         return this.announcementRepository.getViewers(announcementId);
     }
 
-    
+
     async updateAnnouncementAsAdmin(
         id: string,
         data: {

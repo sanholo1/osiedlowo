@@ -21,7 +21,7 @@ export const NotificationBell: React.FC = () => {
 
     useEffect(() => {
         fetchUnreadCount();
-        const interval = setInterval(fetchUnreadCount, 30000); 
+        const interval = setInterval(fetchUnreadCount, 30000);
         return () => clearInterval(interval);
     }, []);
 
@@ -60,7 +60,7 @@ export const NotificationBell: React.FC = () => {
     const fetchNotifications = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:3001/api/notifications?limit=10', {
+            const response = await fetch('http://localhost:3001/api/notifications?limit=50', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (response.ok) {
@@ -73,7 +73,7 @@ export const NotificationBell: React.FC = () => {
     };
 
     const handleNotificationClick = async (notification: Notification) => {
-        
+
         if (!notification.isRead) {
             try {
                 const token = localStorage.getItem('token');
@@ -90,7 +90,7 @@ export const NotificationBell: React.FC = () => {
             }
         }
 
-        
+
         if (notification.link) {
             setIsOpen(false);
             navigate(notification.link);

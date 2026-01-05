@@ -16,6 +16,7 @@ import { SettingsPage } from './pages/SettingsPage';
 import { GroupPage } from './pages/GroupPage';
 import { DirectMessagesPage } from './pages/DirectMessagesPage';
 import { NotificationsPage } from './pages/NotificationsPage';
+import { AdminPage } from './pages/AdminPage';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isLoggedIn } = useAuth();
@@ -129,6 +130,15 @@ const App: React.FC = () => {
               element={
                 <ProtectedRoute>
                   <NotificationsPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute>
+                  <AdminPage />
                 </ProtectedRoute>
               }
             />

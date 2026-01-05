@@ -42,11 +42,15 @@ export const Chat: React.FC<ChatProps> = ({ conversationId, userId }) => {
         newSocket.on('joined_conversation', () => {
             console.log('Joined conversation');
             loadMessages();
+
+            newSocket.emit('mark_read', { conversationId });
         });
 
         newSocket.on('new_message', (message: Message) => {
             setMessages(prev => [...prev, message]);
             scrollToBottom();
+
+            newSocket.emit('mark_read', { conversationId });
         });
 
         newSocket.on('error', (error: { message: string }) => {
@@ -62,7 +66,7 @@ export const Chat: React.FC<ChatProps> = ({ conversationId, userId }) => {
         return () => {
             newSocket.disconnect();
         };
-        
+
     }, [conversationId]);
 
     const loadMessages = async () => {

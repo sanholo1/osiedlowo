@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Chat } from '../components/Chat';
 import { useSettings } from '../contexts/SettingsContext';
+import { io, Socket } from 'socket.io-client';
 import '../styles/UsersGroupsListPage.css';
 
 interface User {
@@ -18,6 +19,7 @@ interface Conversation {
     name?: string;
     participants: User[];
     updatedAt: string;
+    unreadCount?: number;
 }
 
 export const DirectMessagesPage: React.FC = () => {
@@ -30,23 +32,73 @@ export const DirectMessagesPage: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState<User[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [socket, setSocket] = useState<Socket | null>(null);
 
     useEffect(() => {
         fetchConversations();
-    }, []);
 
-    
+        const token = localStorage.getItem('token');
+        const newSocket = io('http://localhost:3001', {
+            auth: { token }
+        });
+
+        newSocket.on('new_message', (message: any) => {
+            setConversations(prev => {
+                const conversationIndex = prev.findIndex(c => c.id === message.conversationId);
+                if (conversationIndex === -1) {
+                    // If conversation doesn't exist in list yet, we might need to fetch it or ignore
+                    // For now, let's just trigger a re-fetch if it's a new conversation
+                    fetchConversations();
+                    return prev;
+                }
+
+                const updatedConversations = [...prev];
+                const conv = { ...updatedConversations[conversationIndex] };
+
+                // Only increment if we are not the sender
+                if (message.senderId !== user?.id) {
+                    conv.unreadCount = (conv.unreadCount || 0) + 1;
+                }
+                conv.updatedAt = message.createdAt;
+
+                updatedConversations.splice(conversationIndex, 1);
+                updatedConversations.unshift(conv);
+                return updatedConversations;
+            });
+        });
+
+        newSocket.on('messages_read', (data: { conversationId: string, userId: string }) => {
+            if (data.userId === user?.id) {
+                setConversations(prev => {
+                    return prev.map(c => {
+                        if (c.id === data.conversationId) {
+                            return { ...c, unreadCount: 0 };
+                        }
+                        return c;
+                    });
+                });
+            }
+        });
+
+        setSocket(newSocket);
+
+        return () => {
+            newSocket.disconnect();
+        };
+    }, [user?.id]);
+
+
     useEffect(() => {
         const targetUserId = searchParams.get('userId');
         if (targetUserId && !isLoading) {
             startConversation(targetUserId);
-            
+
             navigate('/messages', { replace: true });
         }
-        
+
     }, [searchParams, isLoading]);
 
-    
+
     useEffect(() => {
         if (searchQuery.length >= 2) {
             handleSearch();
@@ -66,8 +118,7 @@ export const DirectMessagesPage: React.FC = () => {
 
             if (response.ok) {
                 const data = await response.json();
-                const privateConversations = data.filter((c: Conversation) => c.type === 'private');
-                setConversations(privateConversations);
+                setConversations(data);
             }
         } catch (err) {
             console.error('Error fetching conversations:', err);
@@ -112,7 +163,7 @@ export const DirectMessagesPage: React.FC = () => {
             if (response.ok) {
                 const conversation = await response.json();
 
-                
+
                 if (!conversation.participants || conversation.participants.length === 0) {
                     const otherUser = searchResults.find(u => u.id === otherUserId);
                     if (otherUser && user) {
@@ -146,6 +197,17 @@ export const DirectMessagesPage: React.FC = () => {
             return undefined;
         }
         return conversation.participants.find(p => p.id !== user?.id);
+    };
+
+    const handleSelectConversation = (conversationId: string) => {
+        // Optimistically clear the unread count when opening a conversation
+        setConversations(prev => prev.map(c => {
+            if (c.id === conversationId) {
+                return { ...c, unreadCount: 0 };
+            }
+            return c;
+        }));
+        setSelectedConversationId(conversationId);
     };
 
     const handleDeleteConversation = async (conversationId: string) => {
@@ -314,29 +376,64 @@ export const DirectMessagesPage: React.FC = () => {
                                     )}
                                     {conversations.map(conversation => {
                                         const otherUser = getOtherParticipant(conversation);
+                                        const isGroup = conversation.type === 'group';
                                         return (
                                             <div
                                                 key={conversation.id}
-                                                onClick={() => setSelectedConversationId(conversation.id)}
+                                                onClick={() => handleSelectConversation(conversation.id)}
                                                 style={{
                                                     padding: '10px 16px',
                                                     cursor: 'pointer',
                                                     display: 'flex',
                                                     alignItems: 'center',
                                                     gap: '12px',
-                                                    transition: 'background-color 0.2s'
+                                                    transition: 'background-color 0.2s',
+                                                    position: 'relative'
                                                 }}
                                                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f0f2f5'}
                                                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                                             >
-                                                <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: '#1877f2', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', fontWeight: 'bold', color: 'white' }}>
-                                                    {otherUser?.firstName?.[0] || '?'}
+                                                <div style={{
+                                                    width: '48px',
+                                                    height: '48px',
+                                                    borderRadius: '50%',
+                                                    backgroundColor: isGroup ? '#42b72a' : '#1877f2',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    fontSize: '20px',
+                                                    fontWeight: 'bold',
+                                                    color: 'white',
+                                                    position: 'relative'
+                                                }}>
+                                                    {isGroup ? '🏠' : (otherUser?.firstName?.[0] || '?')}
+                                                    {(conversation.unreadCount ?? 0) > 0 && (
+                                                        <div style={{
+                                                            position: 'absolute',
+                                                            top: '-2px',
+                                                            right: '-2px',
+                                                            backgroundColor: '#ef4444',
+                                                            color: 'white',
+                                                            fontSize: '10px',
+                                                            padding: '2px 6px',
+                                                            borderRadius: '10px',
+                                                            border: '2px solid white',
+                                                            fontWeight: 'bold'
+                                                        }}>
+                                                            {conversation.unreadCount}
+                                                        </div>
+                                                    )}
                                                 </div>
                                                 <div style={{ flex: 1 }}>
-                                                    <div style={{ fontWeight: 'bold', color: '#050505' }}>
-                                                        {otherUser ? `${otherUser.firstName} ${otherUser.lastName}` : t('chat_unknown_user')}
+                                                    <div style={{ fontWeight: 'bold', color: '#050505', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                        <span>
+                                                            {isGroup
+                                                                ? (conversation.name || t('neigh_chat_title') || 'Chat Osiedlowy')
+                                                                : (otherUser ? `${otherUser.firstName} ${otherUser.lastName}` : t('chat_unknown_user'))
+                                                            }
+                                                        </span>
                                                     </div>
-                                                    <div style={{ fontSize: '13px', color: '#65676b' }}>
+                                                    <div style={{ fontSize: '13px', color: (conversation.unreadCount ?? 0) > 0 ? '#1877f2' : '#65676b', fontWeight: (conversation.unreadCount ?? 0) > 0 ? 'bold' : 'normal' }}>
                                                         {new Date(conversation.updatedAt).toLocaleDateString(t('appearance_language') === 'Język' ? 'pl-PL' : 'en-US')}
                                                     </div>
                                                 </div>
