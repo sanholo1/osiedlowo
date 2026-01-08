@@ -153,7 +153,8 @@ export const AdminPage: React.FC = () => {
             return;
         }
         loadSectionData();
-    }, [activeSection, currentPage, searchQuery, loadSectionData, navigate, user?.role]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [activeSection, currentPage, searchQuery]);
 
     const loadStats = async () => {
         const response = await fetch('http://localhost:3001/api/admin/stats', {

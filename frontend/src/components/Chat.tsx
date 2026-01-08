@@ -46,7 +46,10 @@ export const Chat: React.FC<ChatProps> = ({ conversationId, userId }) => {
         });
 
         newSocket.on('new_message', (message: Message) => {
-            setMessages(prev => [...prev, message]);
+            setMessages(prev => {
+                if (prev.some(m => m.id === message.id)) return prev;
+                return [...prev, message];
+            });
             scrollToBottom();
 
             newSocket.emit('mark_read', { conversationId });
@@ -79,7 +82,9 @@ export const Chat: React.FC<ChatProps> = ({ conversationId, userId }) => {
 
             if (response.ok) {
                 const data = await response.json();
-                setMessages(data);
+                // Deduplicate messages by ID
+                const uniqueMessages = Array.from(new Map(data.map((m: any) => [m.id, m])).values());
+                setMessages(uniqueMessages as any);
                 scrollToBottom();
             }
         } catch (error) {

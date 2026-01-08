@@ -91,16 +91,16 @@ export const AnnouncementsSection: React.FC<AnnouncementsSectionProps> = ({
     const [expandedId, setExpandedId] = useState<string | null>(null);
     const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
 
-    
+
     const [newTitle, setNewTitle] = useState('');
     const [newContent, setNewContent] = useState('');
     const [newType, setNewType] = useState<AnnouncementType>(AnnouncementType.INFO);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    
+
     const [responseMessage, setResponseMessage] = useState('');
 
-    
+
     const [profileModalUserId, setProfileModalUserId] = useState<string | null>(null);
     const [ratingModalData, setRatingModalData] = useState<{
         toUserId: string;
@@ -109,7 +109,7 @@ export const AnnouncementsSection: React.FC<AnnouncementsSectionProps> = ({
         announcementTitle: string;
     } | null>(null);
 
-    
+
     useEffect(() => {
         fetchAnnouncements();
     }, [neighborhoodId, filterType]);
@@ -194,7 +194,7 @@ export const AnnouncementsSection: React.FC<AnnouncementsSectionProps> = ({
                 fetchAnnouncements();
             } else {
                 const data = await response.json();
-                alert(data.message || (editingAnnouncement ? t('ann_error_fetch') : t('create_neigh_error_general'))); 
+                alert(data.message || (editingAnnouncement ? t('ann_error_fetch') : t('create_neigh_error_general')));
             }
         } catch (err) {
             alert(t('common_connection_error'));
@@ -203,7 +203,7 @@ export const AnnouncementsSection: React.FC<AnnouncementsSectionProps> = ({
         }
     };
 
-    const handleCreateAnnouncement = handleSubmitAnnouncement; 
+    const handleCreateAnnouncement = handleSubmitAnnouncement;
 
     const handleRespond = async (announcementId: string) => {
         try {
@@ -291,7 +291,7 @@ export const AnnouncementsSection: React.FC<AnnouncementsSectionProps> = ({
                 }
             );
         } catch (err) {
-            
+
         }
     };
 
@@ -372,7 +372,7 @@ export const AnnouncementsSection: React.FC<AnnouncementsSectionProps> = ({
             setExpandedId(null);
         } else {
             setExpandedId(announcementId);
-            
+
             handleRecordView(announcementId);
         }
     };
@@ -426,7 +426,7 @@ export const AnnouncementsSection: React.FC<AnnouncementsSectionProps> = ({
                 ))}
             </div>
 
-            {}
+            { }
             {isLoading ? (
                 <p className="loading-message">{t('ann_loading')}</p>
             ) : error ? (
@@ -471,7 +471,7 @@ export const AnnouncementsSection: React.FC<AnnouncementsSectionProps> = ({
                                 {/* Show accepted helper for IN_PROGRESS status */}
                                 {announcement.status === AnnouncementStatus.IN_PROGRESS && acceptedResponse && (
                                     <div className="accepted-helper-info">
-                                        ✅ {t('ann_in_progress_info')} <strong>{acceptedResponse.user.firstName} {acceptedResponse.user.lastName}</strong>
+                                        ✅ {t('ann_in_progress_info')} <strong>{acceptedResponse.user?.firstName} {acceptedResponse.user?.lastName}</strong>
                                     </div>
                                 )}
 
@@ -485,7 +485,7 @@ export const AnnouncementsSection: React.FC<AnnouncementsSectionProps> = ({
                                             }}
                                             style={{ cursor: 'pointer', textDecoration: 'underline' }}
                                         >
-                                            {announcement.author.firstName} {announcement.author.lastName}
+                                            {announcement.author?.firstName || 'Unknown'} {announcement.author?.lastName || 'User'}
                                         </span>
                                         {announcement.authorId !== userId && (
                                             <button
@@ -494,7 +494,7 @@ export const AnnouncementsSection: React.FC<AnnouncementsSectionProps> = ({
                                                     e.stopPropagation();
                                                     navigate(`/messages?userId=${announcement.authorId}`);
                                                 }}
-                                                title={t('chat_search_placeholder')} 
+                                                title={t('chat_search_placeholder')}
                                             >
                                                 💬
                                             </button>
@@ -513,7 +513,7 @@ export const AnnouncementsSection: React.FC<AnnouncementsSectionProps> = ({
                                     )}
                                 </div>
 
-                                {}
+                                { }
                                 <button
                                     className="expand-btn"
                                     onClick={() => handleExpand(announcement.id)}
@@ -530,7 +530,7 @@ export const AnnouncementsSection: React.FC<AnnouncementsSectionProps> = ({
                                                 {announcement.responses.map((resp) => (
                                                     <div key={resp.id} className={`response-item ${resp.isAccepted ? 'accepted' : ''}`}>
                                                         <div className="response-header">
-                                                            <strong>{resp.user.firstName} {resp.user.lastName}</strong>
+                                                            <strong>{resp.user?.firstName} {resp.user?.lastName}</strong>
                                                             {resp.isAccepted && <span className="accepted-badge">✅ {t('ann_accepted_badge')}</span>}
                                                         </div>
                                                         {resp.message && <p>{resp.message}</p>}
@@ -552,7 +552,7 @@ export const AnnouncementsSection: React.FC<AnnouncementsSectionProps> = ({
                                             </div>
                                         )}
 
-                                        {}
+                                        { }
                                         <div className="announcement-actions">
                                             {announcement.authorId === userId ? (
                                                 <>
@@ -585,7 +585,7 @@ export const AnnouncementsSection: React.FC<AnnouncementsSectionProps> = ({
                                                             className="action-btn rate"
                                                             onClick={() => setRatingModalData({
                                                                 toUserId: acceptedResponse.userId,
-                                                                toUserName: `${acceptedResponse.user.firstName} ${acceptedResponse.user.lastName}`,
+                                                                toUserName: `${acceptedResponse.user?.firstName} ${acceptedResponse.user?.lastName}`,
                                                                 announcementId: announcement.id,
                                                                 announcementTitle: announcement.title
                                                             })}
@@ -645,7 +645,7 @@ export const AnnouncementsSection: React.FC<AnnouncementsSectionProps> = ({
                                                         className="action-btn rate"
                                                         onClick={() => setRatingModalData({
                                                             toUserId: announcement.authorId,
-                                                            toUserName: `${announcement.author.firstName} ${announcement.author.lastName}`,
+                                                            toUserName: `${announcement.author?.firstName} ${announcement.author?.lastName}`,
                                                             announcementId: announcement.id,
                                                             announcementTitle: announcement.title
                                                         })}
@@ -682,7 +682,7 @@ export const AnnouncementsSection: React.FC<AnnouncementsSectionProps> = ({
             )
             }
 
-            {}
+            { }
             {showCreateModal && (
                 <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -758,7 +758,7 @@ export const AnnouncementsSection: React.FC<AnnouncementsSectionProps> = ({
                 />
             )}
 
-            {}
+            { }
             {ratingModalData && (
                 <RatingModal
                     toUserId={ratingModalData.toUserId}
