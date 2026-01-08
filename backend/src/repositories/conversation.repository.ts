@@ -124,4 +124,14 @@ export class ConversationRepository {
     async delete(id: string): Promise<void> {
         await this.repository.delete(id);
     }
+
+    async findAllGroups(): Promise<Conversation[]> {
+        return this.repository
+            .createQueryBuilder('conversation')
+            .where('conversation.type = :type', { type: ConversationType.GROUP })
+            .leftJoinAndSelect('conversation.participants', 'participants')
+            .leftJoinAndSelect('participants.user', 'user')
+            .orderBy('conversation.updatedAt', 'DESC')
+            .getMany();
+    }
 }

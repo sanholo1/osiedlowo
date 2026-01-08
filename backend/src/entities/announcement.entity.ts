@@ -45,6 +45,12 @@ export class Announcement {
     @Column({ type: 'boolean', default: false })
     isPinned: boolean;
 
+    @Column({ type: 'boolean', default: false })
+    isFlagged: boolean;
+
+    @Column({ type: 'varchar', length: 255, nullable: true })
+    flagReason: string | null;
+
     @Column({ type: 'varchar', length: 36 })
     authorId: string;
 

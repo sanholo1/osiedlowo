@@ -173,6 +173,12 @@ export const ProfilePage: React.FC = () => {
         setMessage('');
 
         try {
+            if (isSystemAdmin) {
+                setMessage(t('profile_update_error'));
+                setIsLoading(false);
+                return;
+            }
+
             const updateData: any = {};
             if (formData.email) updateData.email = formData.email;
             if (formData.firstName) updateData.firstName = formData.firstName;
@@ -388,7 +394,7 @@ export const ProfilePage: React.FC = () => {
                                             type="button"
                                             onClick={() => handleRemoveAttribute(attr)}
                                             className="remove-attribute-btn"
-                                            disabled={isLoading}
+                                            disabled={isLoading || isSystemAdmin}
                                         >
                                             ×
                                         </button>
@@ -406,10 +412,10 @@ export const ProfilePage: React.FC = () => {
                             {showAttributeSelector ? `▲ ${t('profile_selector_hide')}` : `▼ ${t('profile_selector_show')}`}
                         </button>
 
-                        {}
+                        { }
                         {showAttributeSelector && (
                             <div className="attribute-selector">
-                                {}
+                                { }
                                 <div className="attribute-search">
                                     <input
                                         type="text"
@@ -420,7 +426,7 @@ export const ProfilePage: React.FC = () => {
                                     />
                                 </div>
 
-                                {}
+                                { }
                                 <div className="categories-container">
                                     {filteredCategories.map(category => (
                                         <div key={category.id} className="category-section">
@@ -449,7 +455,7 @@ export const ProfilePage: React.FC = () => {
                                                                 type="checkbox"
                                                                 checked={attributes.includes(attr)}
                                                                 onChange={() => handleToggleAttribute(attr)}
-                                                                disabled={isLoading}
+                                                                disabled={isLoading || isSystemAdmin}
                                                             />
                                                             <span>{t(attr)}</span>
                                                         </label>
@@ -472,13 +478,13 @@ export const ProfilePage: React.FC = () => {
                                     onChange={(e) => setNewAttribute(e.target.value)}
                                     onKeyPress={handleKeyPress}
                                     placeholder={t('profile_custom_attr_placeholder')}
-                                    disabled={isLoading}
+                                    disabled={isLoading || isSystemAdmin}
                                     maxLength={MAX_ATTRIBUTE_LENGTH}
                                 />
                                 <button
                                     type="button"
                                     onClick={handleAddAttribute}
-                                    disabled={isLoading || !newAttribute.trim()}
+                                    disabled={isLoading || !newAttribute.trim() || isSystemAdmin}
                                     className="add-attribute-btn"
                                     data-i18n="profile_attr_add_btn"
                                 >

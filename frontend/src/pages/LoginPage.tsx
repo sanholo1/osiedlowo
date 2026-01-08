@@ -24,13 +24,13 @@ export const LoginPage: React.FC = () => {
         e.preventDefault();
         const success = await login(formData);
         if (success) {
-            navigate('/home');
+            // Navigation handled by PublicRoute or route guards
         }
     };
 
     return (
         <div id='container-log-reg'>
-            {}
+            { }
             <div className="login-controls">
                 <button
                     type="button"

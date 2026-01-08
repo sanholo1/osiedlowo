@@ -42,7 +42,7 @@ export class ChatService {
             participantIds: [user1Id, user2Id],
         });
 
-        
+
         return {
             id: conversationToTransform.id,
             type: conversationToTransform.type,
@@ -247,4 +247,42 @@ export class ChatService {
         }
         return total;
     }
+
+    async getAllGroupConversations(): Promise<Conversation[]> {
+        return this.conversationRepository.findAllGroups();
+    }
+
+    async getMessagesForAdmin(conversationId: string, page: number = 1, limit: number = 50): Promise<{ messages: MessageResponseDto[]; total: number }> {
+        const offset = (page - 1) * limit;
+        const messages = await this.messageRepository.findByConversation(conversationId, limit, offset);
+        const total = await this.messageRepository.countByConversation(conversationId);
+
+        return {
+            messages: messages.map(message => ({
+                id: message.id,
+                conversationId: message.conversationId,
+                senderId: message.senderId,
+                content: message.content,
+                readBy: message.readBy || [],
+                sender: {
+                    id: message.sender?.id || message.senderId,
+                    username: message.sender?.username || message.sender?.email || '',
+                    firstName: message.sender?.firstName || '',
+                    lastName: message.sender?.lastName || '',
+                },
+                createdAt: message.createdAt,
+                updatedAt: message.updatedAt,
+            })),
+            total
+        };
+    }
+
+    async deleteMessageAsAdmin(messageId: string): Promise<void> {
+        const message = await this.messageRepository.findById(messageId);
+        if (!message) {
+            throw new NotFoundException('Wiadomość nie została znaleziona');
+        }
+        await this.messageRepository.delete(messageId);
+    }
 }
+

@@ -38,12 +38,7 @@ class App {
 
     this.app.use(express.static('public'));
 
-    if (appConfig.nodeEnv === 'development') {
-      this.app.use((req, res, next) => {
-        console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
-        next();
-      });
-    }
+
   }
 
   private initializeRoutes(): void {

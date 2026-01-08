@@ -12,6 +12,8 @@ import { AnnouncementView } from '@entities/announcement-view.entity';
 import { Notification } from '@entities/notification.entity';
 import { BlockedUser } from '@entities/blocked-user.entity';
 import { Rating } from '@entities/rating.entity';
+import { AdminLog } from '@entities/admin-log.entity';
+import { SystemAnnouncement } from '@entities/system-announcement.entity';
 
 export const AppDataSource = new DataSource({
   type: 'mysql',
@@ -22,9 +24,9 @@ export const AppDataSource = new DataSource({
   database: appConfig.database.database,
   synchronize: false,
   logging: false,
-  entities: [User, Conversation, Message, ConversationParticipant, Neighborhood, Announcement, AnnouncementResponse, AnnouncementView, Notification, BlockedUser, Rating],
+  entities: [User, Conversation, Message, ConversationParticipant, Neighborhood, Announcement, AnnouncementResponse, AnnouncementView, Notification, BlockedUser, Rating, AdminLog, SystemAnnouncement],
 
   migrations: ['src/migrations/*.ts'],
-  migrationsRun: true, 
+  migrationsRun: false,
   subscribers: ['src/subscribers/*.ts'],
 });

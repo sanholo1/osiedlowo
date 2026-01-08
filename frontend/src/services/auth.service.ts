@@ -1,21 +1,6 @@
-import axios from 'axios';
-import { API_BASE_URL, API_ENDPOINTS } from '../config/api.config';
+import axiosInstance from '../config/axios';
+import { API_ENDPOINTS } from '../config/api.config';
 import { LoginForm, RegisterForm, AuthResponse } from '../types/auth.types';
-
-const axiosInstance = axios.create({
-    baseURL: API_BASE_URL,
-    headers: {
-        'Content-Type': 'application/json',
-    },
-});
-
-axiosInstance.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-});
 
 export const authService = {
     login: async (data: LoginForm) => {

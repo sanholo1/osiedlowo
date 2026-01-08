@@ -3,8 +3,10 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Chat } from '../components/Chat';
 import { useSettings } from '../contexts/SettingsContext';
+import { chatService } from '../services/chat.service';
 import { io, Socket } from 'socket.io-client';
 import '../styles/UsersGroupsListPage.css';
+import '../styles/DirectMessagesPage.css';
 
 interface User {
     id: string;
@@ -109,17 +111,8 @@ export const DirectMessagesPage: React.FC = () => {
 
     const fetchConversations = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:3001/api/chat/conversations', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                setConversations(data);
-            }
+            const data = await chatService.getConversations();
+            setConversations(data);
         } catch (err) {
             console.error('Error fetching conversations:', err);
         } finally {
@@ -129,17 +122,8 @@ export const DirectMessagesPage: React.FC = () => {
 
     const handleSearch = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:3001/api/chat/users/search?q=${searchQuery}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                setSearchResults(data);
-            }
+            const data = await chatService.searchUsers(searchQuery);
+            setSearchResults(data);
         } catch (err) {
             console.error('Error searching users:', err);
         }
@@ -147,48 +131,29 @@ export const DirectMessagesPage: React.FC = () => {
 
     const startConversation = async (otherUserId: string) => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:3001/api/chat/conversations', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    type: 'private',
-                    participantIds: [otherUserId]
-                })
-            });
+            const conversation = await chatService.startConversation([otherUserId]);
 
-            if (response.ok) {
-                const conversation = await response.json();
-
-
-                if (!conversation.participants || conversation.participants.length === 0) {
-                    const otherUser = searchResults.find(u => u.id === otherUserId);
-                    if (otherUser && user) {
-                        conversation.participants = [
-                            { id: user.id, firstName: user.firstName, lastName: user.lastName, email: user.email },
-                            otherUser
-                        ];
-                    }
+            if (!conversation.participants || conversation.participants.length === 0) {
+                const otherUser = searchResults.find(u => u.id === otherUserId);
+                if (otherUser && user) {
+                    conversation.participants = [
+                        { id: user.id, firstName: user.firstName, lastName: user.lastName, email: user.email },
+                        otherUser
+                    ];
                 }
-
-                if (!conversations.find(c => c.id === conversation.id)) {
-                    setConversations(prev => [conversation, ...prev]);
-                }
-                setSelectedConversationId(conversation.id);
-                setSearchQuery('');
-                setSearchResults([]);
-            } else {
-                const errorData = await response.json().catch(() => ({}));
-                const errorMessage = errorData.message || response.statusText;
-                console.error('Failed to start conversation:', response.status, errorData);
-                alert(`${t('chat_start_error')}: ${errorMessage} (${response.status})`);
             }
-        } catch (err) {
+
+            if (!conversations.find(c => c.id === conversation.id)) {
+                setConversations(prev => [conversation, ...prev]);
+            }
+            setSelectedConversationId(conversation.id);
+            setSearchQuery('');
+            setSearchResults([]);
+        } catch (err: any) {
             console.error('Error starting conversation:', err);
-            alert(t('common_connection_error'));
+            // Assuming error handling logic aligns with what axios throws
+            const errorMessage = err.response?.data?.message || err.message;
+            alert(`${t('chat_start_error')}: ${errorMessage}`);
         }
     };
 
@@ -216,21 +181,10 @@ export const DirectMessagesPage: React.FC = () => {
         }
 
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:3001/api/chat/conversations/${conversationId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (response.ok) {
-                setConversations(prev => prev.filter(c => c.id !== conversationId));
-                if (selectedConversationId === conversationId) {
-                    setSelectedConversationId(null);
-                }
-            } else {
-                alert(t('chat_delete_error'));
+            await chatService.deleteConversation(conversationId);
+            setConversations(prev => prev.filter(c => c.id !== conversationId));
+            if (selectedConversationId === conversationId) {
+                setSelectedConversationId(null);
             }
         } catch (err) {
             console.error('Error deleting conversation:', err);
@@ -249,183 +203,105 @@ export const DirectMessagesPage: React.FC = () => {
     if (!user) return null;
 
     return (
-        <div className="home-container" style={{ height: '100vh', flexDirection: 'column', justifyContent: 'flex-start', backgroundColor: '#f0f2f5', padding: 0 }}>
-            <div style={{
-                width: '100%',
-                padding: '10px 20px',
-                backgroundColor: 'white',
-                borderBottom: '1px solid #ddd',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                height: '60px',
-                position: 'sticky',
-                top: 0,
-                zIndex: 100
-            }}>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
+        <div className="home-container dm-page-container">
+            <div className="dm-header">
+                <div className="dm-header-left">
                     <button
                         onClick={handleBack}
-                        style={{
-                            marginRight: '20px',
-                            padding: '8px 16px',
-                            backgroundColor: '#e4e6eb',
-                            color: 'black',
-                            border: 'none',
-                            borderRadius: '20px',
-                            cursor: 'pointer',
-                            fontWeight: 'bold'
-                        }}
+                        className="dm-back-btn"
                     >
                         &larr; {selectedConversationId ? t('chat_back_to_list') : t('back_home')}
                     </button>
-                    <h2 style={{ margin: 0, fontSize: '24px', color: '#050505' }}>
+                    <h2 className="dm-title">
                         {selectedConversationId ? t('chat_title_individual') : t('chat_title_list')}
                     </h2>
                 </div>
                 {selectedConversationId && (
                     <button
                         onClick={() => handleDeleteConversation(selectedConversationId)}
-                        style={{
-                            padding: '8px 16px',
-                            backgroundColor: '#ffebee',
-                            color: '#d32f2f',
-                            border: 'none',
-                            borderRadius: '20px',
-                            cursor: 'pointer',
-                            fontWeight: 'bold',
-                            fontSize: '14px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '5px'
-                        }}
+                        className="dm-delete-btn"
                     >
                         🗑️ {t('chat_delete_btn')}
                     </button>
                 )}
             </div>
 
-            <div style={{ width: '100%', maxWidth: '800px', margin: '0 auto', height: 'calc(100vh - 60px)', display: 'flex', flexDirection: 'column' }}>
+            <div className="dm-content-layout">
                 {selectedConversationId ? (
-                    <div style={{ flex: 1, backgroundColor: 'white', display: 'flex', flexDirection: 'column' }}>
+                    <div className="dm-chat-view">
                         <Chat conversationId={selectedConversationId} userId={user.id} />
                     </div>
                 ) : (
-                    <div style={{ flex: 1, backgroundColor: 'white', display: 'flex', flexDirection: 'column', overflowY: 'hidden' }}>
-                        <div style={{ padding: '10px 16px' }}>
+                    <div className="dm-list-view">
+                        <div className="dm-search-container">
                             <input
                                 type="text"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 placeholder={t('chat_search_placeholder')}
-                                style={{
-                                    width: '100%',
-                                    padding: '10px 16px',
-                                    borderRadius: '20px',
-                                    border: 'none',
-                                    backgroundColor: '#f0f2f5',
-                                    fontSize: '15px',
-                                    outline: 'none'
-                                }}
+                                className="dm-search-input"
                             />
                         </div>
 
-                        <div style={{ overflowY: 'auto', flex: 1 }}>
+                        <div className="dm-list-scroll">
                             {searchQuery.length >= 2 ? (
                                 <div>
-                                    <div style={{ padding: '10px 16px', fontSize: '13px', fontWeight: 'bold', color: '#65676b' }}>
+                                    <div className="dm-search-results-label">
                                         {t('chat_search_results')}
                                     </div>
                                     {searchResults.map(resultUser => (
                                         <div
                                             key={resultUser.id}
                                             onClick={() => startConversation(resultUser.id)}
-                                            style={{
-                                                padding: '10px 16px',
-                                                cursor: 'pointer',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '12px',
-                                                transition: 'background-color 0.2s'
-                                            }}
-                                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f0f2f5'}
-                                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                                            className="dm-user-item"
                                         >
-                                            <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#ddd', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 'bold', color: '#555' }}>
+                                            <div className="dm-avatar-placeholder">
                                                 {resultUser.firstName[0]}
                                             </div>
                                             <div>
-                                                <div style={{ fontWeight: 'bold', color: '#050505' }}>{resultUser.firstName} {resultUser.lastName}</div>
-                                                <div style={{ fontSize: '13px', color: '#65676b' }}>{resultUser.email}</div>
+                                                <div className="dm-user-info-name">{resultUser.firstName} {resultUser.lastName}</div>
+                                                <div className="dm-user-info-email">{resultUser.email}</div>
                                             </div>
                                         </div>
                                     ))}
                                     {searchResults.length === 0 && (
-                                        <div style={{ padding: '20px', textAlign: 'center', color: '#65676b' }}>
+                                        <div className="dm-no-results">
                                             {t('chat_no_users_found')}
                                         </div>
                                     )}
                                 </div>
                             ) : (
                                 <div>
-                                    {isLoading && <p style={{ padding: '20px', textAlign: 'center' }}>{t('common_loading')}</p>}
+                                    {isLoading && <p className="dm-loading">{t('common_loading')}</p>}
                                     {!isLoading && conversations.length === 0 && (
-                                        <p style={{ padding: '20px', textAlign: 'center', color: '#65676b' }}>
+                                        <p className="dm-empty-list">
                                             {t('chat_empty_list')}
                                         </p>
                                     )}
                                     {conversations.map(conversation => {
                                         const otherUser = getOtherParticipant(conversation);
                                         const isGroup = conversation.type === 'group';
+                                        const unreadCount = conversation.unreadCount ?? 0;
+
                                         return (
                                             <div
                                                 key={conversation.id}
                                                 onClick={() => handleSelectConversation(conversation.id)}
-                                                style={{
-                                                    padding: '10px 16px',
-                                                    cursor: 'pointer',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: '12px',
-                                                    transition: 'background-color 0.2s',
-                                                    position: 'relative'
-                                                }}
-                                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f0f2f5'}
-                                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                                                className="dm-conversation-item"
                                             >
-                                                <div style={{
-                                                    width: '48px',
-                                                    height: '48px',
-                                                    borderRadius: '50%',
-                                                    backgroundColor: isGroup ? '#42b72a' : '#1877f2',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    fontSize: '20px',
-                                                    fontWeight: 'bold',
-                                                    color: 'white',
-                                                    position: 'relative'
-                                                }}>
+                                                <div
+                                                    className="dm-conversation-avatar"
+                                                    style={{ backgroundColor: isGroup ? '#42b72a' : '#1877f2' }}
+                                                >
                                                     {isGroup ? '🏠' : (otherUser?.firstName?.[0] || '?')}
-                                                    {(conversation.unreadCount ?? 0) > 0 && (
-                                                        <div style={{
-                                                            position: 'absolute',
-                                                            top: '-2px',
-                                                            right: '-2px',
-                                                            backgroundColor: '#ef4444',
-                                                            color: 'white',
-                                                            fontSize: '10px',
-                                                            padding: '2px 6px',
-                                                            borderRadius: '10px',
-                                                            border: '2px solid white',
-                                                            fontWeight: 'bold'
-                                                        }}>
-                                                            {conversation.unreadCount}
+                                                    {unreadCount > 0 && (
+                                                        <div className="dm-unread-badge">
+                                                            {unreadCount}
                                                         </div>
                                                     )}
                                                 </div>
-                                                <div style={{ flex: 1 }}>
-                                                    <div style={{ fontWeight: 'bold', color: '#050505', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <div className="dm-conversation-info">
+                                                    <div className="dm-conversation-header">
                                                         <span>
                                                             {isGroup
                                                                 ? (conversation.name || t('neigh_chat_title') || 'Chat Osiedlowy')
@@ -433,7 +309,7 @@ export const DirectMessagesPage: React.FC = () => {
                                                             }
                                                         </span>
                                                     </div>
-                                                    <div style={{ fontSize: '13px', color: (conversation.unreadCount ?? 0) > 0 ? '#1877f2' : '#65676b', fontWeight: (conversation.unreadCount ?? 0) > 0 ? 'bold' : 'normal' }}>
+                                                    <div className={`dm-conversation-date ${unreadCount > 0 ? 'dm-text-unread' : 'dm-text-read'}`}>
                                                         {new Date(conversation.updatedAt).toLocaleDateString(t('appearance_language') === 'Język' ? 'pl-PL' : 'en-US')}
                                                     </div>
                                                 </div>

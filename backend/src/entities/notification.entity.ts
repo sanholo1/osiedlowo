@@ -6,7 +6,8 @@ export enum NotificationType {
     NEW_RESPONSE = 'NEW_RESPONSE',
     OFFER_ACCEPTED = 'OFFER_ACCEPTED',
     NEW_MESSAGE = 'NEW_MESSAGE',
-    OFFER_RECEIVED = 'OFFER_RECEIVED'
+    OFFER_RECEIVED = 'OFFER_RECEIVED',
+    SYSTEM_ANNOUNCEMENT = 'SYSTEM_ANNOUNCEMENT'
 }
 
 @Entity('notifications')
@@ -37,7 +38,7 @@ export class Notification {
     link: string | null;
 
     @Column({ type: 'varchar', length: 36, nullable: true })
-    relatedId: string | null; 
+    relatedId: string | null;
 
     @Column({ type: 'boolean', default: false })
     isRead: boolean;

@@ -240,4 +240,14 @@ export class NeighborhoodService {
             await this.conversationRepository.removeParticipant(conversation.id, userId);
         }
     }
+
+    async updateNeighborhoodAsAdmin(id: string, data: Partial<Neighborhood>): Promise<Neighborhood> {
+        const neighborhood = await this.neighborhoodRepository.findById(id);
+        if (!neighborhood) {
+            throw new Error('Sąsiedztwo nie istnieje');
+        }
+
+        await this.neighborhoodRepository.update(id, data);
+        return this.neighborhoodRepository.findById(id) as Promise<Neighborhood>;
+    }
 }

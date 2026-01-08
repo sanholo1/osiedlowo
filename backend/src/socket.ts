@@ -37,7 +37,7 @@ export const initializeSocket = (httpServer: HTTPServer): SocketIOServer => {
 
     io.on('connection', (socket: AuthenticatedSocket) => {
         const userId = socket.userId!;
-        console.log(`✅ User connected: ${userId}`);
+
 
         socket.join(`user:${userId}`);
 
@@ -52,7 +52,7 @@ export const initializeSocket = (httpServer: HTTPServer): SocketIOServer => {
                 }
 
                 socket.join(`conversation:${conversationId}`);
-                console.log(`User ${userId} joined conversation ${conversationId}`);
+
 
                 socket.emit('joined_conversation', { conversationId });
             } catch (error) {
@@ -88,7 +88,7 @@ export const initializeSocket = (httpServer: HTTPServer): SocketIOServer => {
                     updatedAt: message.updatedAt,
                 });
 
-                console.log(`Message sent in conversation ${conversationId} by user ${userId}`);
+
             } catch (error: any) {
                 console.error('Error sending message:', error);
                 socket.emit('error', { message: error.message || 'Błąd wysyłania wiadomości' });
@@ -140,7 +140,7 @@ export const initializeSocket = (httpServer: HTTPServer): SocketIOServer => {
                     deletedBy: userId,
                 });
 
-                console.log(`Message ${messageId} deleted by user ${userId}`);
+
             } catch (error: any) {
                 console.error('Error deleting message:', error);
                 socket.emit('error', { message: error.message || 'Błąd usuwania wiadomości' });
@@ -148,11 +148,11 @@ export const initializeSocket = (httpServer: HTTPServer): SocketIOServer => {
         });
 
         socket.on('disconnect', () => {
-            console.log(`❌ User disconnected: ${userId}`);
+
         });
     });
 
-    console.log('⚡ Socket.io initialized');
+
 
     return io;
 };

@@ -8,7 +8,6 @@ interface UnreadBadgeProps {
 
 export const UnreadBadge: React.FC<UnreadBadgeProps> = ({ className = '' }) => {
     const [count, setCount] = useState(0);
-    const [socket, setSocket] = useState<Socket | null>(null);
 
     const fetchUnreadCount = async () => {
         try {
@@ -28,10 +27,10 @@ export const UnreadBadge: React.FC<UnreadBadgeProps> = ({ className = '' }) => {
     };
 
     useEffect(() => {
-        
+
         fetchUnreadCount();
 
-        
+
         const token = localStorage.getItem('token');
         if (token) {
             const newSocket = io('http://localhost:3001', {
@@ -39,20 +38,20 @@ export const UnreadBadge: React.FC<UnreadBadgeProps> = ({ className = '' }) => {
             });
 
             newSocket.on('connect', () => {
-                console.log('UnreadBadge: Socket connected');
+                // Connected
             });
 
-            
+
             newSocket.on('new_message', () => {
                 fetchUnreadCount();
             });
 
-            
+
             newSocket.on('messages_read', () => {
                 fetchUnreadCount();
             });
 
-            setSocket(newSocket);
+
 
             return () => {
                 newSocket.disconnect();

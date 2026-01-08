@@ -1,6 +1,8 @@
 import { NotificationRepository } from '../repositories/notification.repository';
 import { NeighborhoodRepository } from '../repositories/neighborhood.repository';
 import { Notification, NotificationType } from '../entities/notification.entity';
+import { AppDataSource } from '@config/database';
+import { User } from '../entities/user.entity';
 
 export class NotificationService {
     private notificationRepository: NotificationRepository;
@@ -27,7 +29,7 @@ export class NotificationService {
         return this.notificationRepository.markAllAsRead(userId);
     }
 
-    
+
     async notifyNewAnnouncement(
         neighborhoodId: string,
         announcementId: string,
@@ -35,7 +37,7 @@ export class NotificationService {
         authorName: string,
         title: string
     ): Promise<void> {
-        
+
         const neighborhood = await this.neighborhoodRepository.findById(neighborhoodId);
         if (!neighborhood || !neighborhood.members) return;
 
@@ -103,5 +105,34 @@ export class NotificationService {
             link: `/messages`,
             relatedId: conversationId,
         });
+    }
+
+    async notifySystemAnnouncement(
+        announcementId: string,
+        title: string,
+        content: string
+    ): Promise<void> {
+        const userRepository = AppDataSource.getRepository(User);
+        const activeUsers = await userRepository.find({
+            where: { isActive: true },
+            select: ['id']
+        });
+
+        const notifications = activeUsers.map(user => ({
+            userId: user.id,
+            type: NotificationType.SYSTEM_ANNOUNCEMENT,
+            title: 'Ogłoszenie systemowe',
+            message: title,
+            link: null,
+            relatedId: announcementId,
+        }));
+
+        if (notifications.length > 0) {
+            await this.notificationRepository.createMany(notifications);
+        }
+    }
+
+    async deleteSystemAnnouncementNotifications(announcementId: string): Promise<void> {
+        await this.notificationRepository.deleteByRelatedId(announcementId);
     }
 }

@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import io, { Socket } from 'socket.io-client';
 import { useSettings } from '../contexts/SettingsContext';
+import { UserProfileModal } from './UserProfileModal';
 
 interface Message {
     id: string;
@@ -26,6 +27,7 @@ export const Chat: React.FC<ChatProps> = ({ conversationId, userId }) => {
     const [socket, setSocket] = useState<Socket | null>(null);
     const [isConnected, setIsConnected] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const [profileModalUserId, setProfileModalUserId] = useState<string | null>(null);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -34,15 +36,12 @@ export const Chat: React.FC<ChatProps> = ({ conversationId, userId }) => {
         });
 
         newSocket.on('connect', () => {
-            console.log('Connected to chat');
             setIsConnected(true);
             newSocket.emit('join_conversation', { conversationId });
         });
 
         newSocket.on('joined_conversation', () => {
-            console.log('Joined conversation');
             loadMessages();
-
             newSocket.emit('mark_read', { conversationId });
         });
 
@@ -54,7 +53,7 @@ export const Chat: React.FC<ChatProps> = ({ conversationId, userId }) => {
         });
 
         newSocket.on('error', (error: { message: string }) => {
-            console.error('Socket error:', error);
+            console.error('Chat socket error:', error.message || error);
         });
 
         newSocket.on('disconnect', () => {
@@ -63,13 +62,10 @@ export const Chat: React.FC<ChatProps> = ({ conversationId, userId }) => {
 
         setSocket(newSocket);
 
-        return () => {
-            newSocket.disconnect();
-        };
-
     }, [conversationId]);
 
-    const loadMessages = async () => {
+    const loadMessages = useCallback(async () => {
+        if (!conversationId) return;
         try {
             const token = localStorage.getItem('token');
             const response = await fetch(
@@ -87,9 +83,13 @@ export const Chat: React.FC<ChatProps> = ({ conversationId, userId }) => {
                 scrollToBottom();
             }
         } catch (error) {
-            console.error('Error loading messages:', error);
+            console.error('Failed to load messages:', error);
         }
-    };
+    }, [conversationId]);
+
+    useEffect(() => {
+        loadMessages();
+    }, [loadMessages]);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -144,7 +144,10 @@ export const Chat: React.FC<ChatProps> = ({ conversationId, userId }) => {
                         }}
                     >
                         <div style={{ fontSize: '0.85em', color: '#666', marginBottom: '4px' }}>
-                            <strong>
+                            <strong
+                                onClick={() => setProfileModalUserId(message.senderId)}
+                                style={{ cursor: 'pointer', textDecoration: 'underline' }}
+                            >
                                 {message.senderId === userId
                                     ? t('chat_you')
                                     : `${message.sender.firstName} ${message.sender.lastName}`}
@@ -175,6 +178,14 @@ export const Chat: React.FC<ChatProps> = ({ conversationId, userId }) => {
                     {t('chat_send_btn')}
                 </button>
             </form>
+
+            {profileModalUserId && (
+                <UserProfileModal
+                    userId={profileModalUserId}
+                    currentUserId={userId}
+                    onClose={() => setProfileModalUserId(null)}
+                />
+            )}
         </div>
     );
 };

@@ -164,7 +164,7 @@ export class UserService {
     return blockedUserRepository.isBlocked(userId, blockedUserId);
   }
 
-  
+
   async getAllUsersWithPagination(options?: {
     page?: number;
     limit?: number;
@@ -216,6 +216,30 @@ export class UserService {
     if (!deleted) {
       throw new HttpException('Nie udało się usunąć użytkownika', 500);
     }
+  }
+
+  async updateUserAsAdmin(userId: string, data: {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    address?: string;
+    attributes?: string[];
+  }): Promise<User> {
+    const user = await this.findById(userId);
+
+    if (data.email && data.email !== user.email) {
+      const existingUser = await this.userRepository.findByEmail(data.email);
+      if (existingUser) {
+        throw new BadRequestException('Użytkownik z tym adresem email już istnieje');
+      }
+    }
+
+    const updated = await this.userRepository.update(userId, data);
+    if (!updated) {
+      throw new HttpException('Nie udało się zaktualizować użytkownika', 500);
+    }
+
+    return updated;
   }
 }
 

@@ -24,8 +24,36 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 };
 
 const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isLoggedIn } = useAuth();
-  return !isLoggedIn ? <>{children}</> : <Navigate to="/home" replace />;
+  const { isLoggedIn, user } = useAuth();
+  if (isLoggedIn) {
+    if (user?.role === 'admin') {
+      return <Navigate to="/admin" replace />;
+    }
+    return <Navigate to="/home" replace />;
+  }
+  return <>{children}</>;
+};
+
+const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isLoggedIn, user } = useAuth();
+  if (!isLoggedIn) {
+    return <Navigate to="/login" replace />;
+  }
+  if (user?.role !== 'admin') {
+    return <Navigate to="/home" replace />;
+  }
+  return <>{children}</>;
+};
+
+const UserRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isLoggedIn, user } = useAuth();
+  if (!isLoggedIn) {
+    return <Navigate to="/login" replace />;
+  }
+  if (user?.role === 'admin') {
+    return <Navigate to="/admin" replace />;
+  }
+  return <>{children}</>;
 };
 
 const App: React.FC = () => {
@@ -64,25 +92,25 @@ const App: React.FC = () => {
             <Route
               path="/home"
               element={
-                <ProtectedRoute>
+                <UserRoute>
                   <HomePage />
-                </ProtectedRoute>
+                </UserRoute>
               }
             />
             <Route
               path="/profile"
               element={
-                <ProtectedRoute>
+                <UserRoute>
                   <ProfilePage />
-                </ProtectedRoute>
+                </UserRoute>
               }
             />
             <Route
               path="/groupcreating"
               element={
-                <ProtectedRoute>
+                <UserRoute>
                   <GroupCreatingPage />
-                </ProtectedRoute>
+                </UserRoute>
               }
             />
             <Route
@@ -94,19 +122,27 @@ const App: React.FC = () => {
               }
             />
             <Route
-              path="/groupslist"
+              path="/direct-messages"
               element={
                 <ProtectedRoute>
-                  <UsersGroupsListPage />
+                  <DirectMessagesPage />
                 </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/groupslist"
+              element={
+                <UserRoute>
+                  <UsersGroupsListPage />
+                </UserRoute>
               }
             />
             <Route
               path="/search"
               element={
-                <ProtectedRoute>
+                <UserRoute>
                   <SearchForGroupPage />
-                </ProtectedRoute>
+                </UserRoute>
               }
             />
             <Route
@@ -120,26 +156,26 @@ const App: React.FC = () => {
             <Route
               path="/group"
               element={
-                <ProtectedRoute>
+                <UserRoute>
                   <GroupPage />
-                </ProtectedRoute>
+                </UserRoute>
               }
             />
             <Route
               path="/notifications"
               element={
-                <ProtectedRoute>
+                <UserRoute>
                   <NotificationsPage />
-                </ProtectedRoute>
+                </UserRoute>
               }
             />
 
             <Route
               path="/admin"
               element={
-                <ProtectedRoute>
+                <AdminRoute>
                   <AdminPage />
-                </ProtectedRoute>
+                </AdminRoute>
               }
             />
 

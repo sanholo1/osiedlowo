@@ -56,6 +56,10 @@ export class NotificationRepository {
         return result.affected !== 0;
     }
 
+    async deleteByRelatedId(relatedId: string): Promise<void> {
+        await this.repository.delete({ relatedId });
+    }
+
     async deleteOldNotifications(olderThanDays: number = 30): Promise<void> {
         const cutoffDate = new Date();
         cutoffDate.setDate(cutoffDate.getDate() - olderThanDays);

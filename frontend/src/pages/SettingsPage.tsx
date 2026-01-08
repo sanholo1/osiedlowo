@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useSettings } from '../contexts/SettingsContext';
+import { useAuth } from '../contexts/AuthContext';
 import '../styles/SettingsPage.css';
 
 export const SettingsPage: React.FC = () => {
-    
-    const { lang, setLang, theme, toggleTheme, t } = useSettings();
 
-    
+    const { lang, setLang, theme, toggleTheme, t } = useSettings();
+    const { user } = useAuth();
+
+
     const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
-    
+
     const [passwords, setPasswords] = useState({
         oldPassword: '',
         newPassword: '',
@@ -20,15 +22,15 @@ export const SettingsPage: React.FC = () => {
     const [passwordSuccess, setPasswordSuccess] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    
+
     useEffect(() => {
         if ('Notification' in window) {
             setNotificationsEnabled(Notification.permission === 'granted');
         }
 
-        
-        
-        
+
+
+
     }, []);
 
     const handleNotificationToggle = async () => {
@@ -137,7 +139,7 @@ export const SettingsPage: React.FC = () => {
                     </div>
                 </div>
 
-                {}
+                { }
                 <div className="settings-section">
                     <h2 data-i18n="notifications_section">{t('notifications_section')}</h2>
                     <div className="notification-toggle">
@@ -159,7 +161,7 @@ export const SettingsPage: React.FC = () => {
                     </p>
                 </div>
 
-                {}
+                { }
                 <div className="settings-section">
                     <h2 data-i18n="security_section">{t('security_section')}</h2>
                     {passwordSuccess && <div className="success-message" data-i18n="security_success">{passwordSuccess}</div>}
@@ -210,7 +212,9 @@ export const SettingsPage: React.FC = () => {
                 </div>
 
                 <p>
-                    <Link to="/home" data-i18n="back_home">{t('back_home')}</Link>
+                    <Link to={user?.role === 'admin' ? "/admin" : "/home"} data-i18n={user?.role === 'admin' ? "back_admin" : "back_home"}>
+                        {user?.role === 'admin' ? t('back_admin') : t('back_home')}
+                    </Link>
                 </p>
             </div>
         </div>

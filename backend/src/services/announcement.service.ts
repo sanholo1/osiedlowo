@@ -381,6 +381,9 @@ export class AnnouncementService {
             content?: string;
             type?: AnnouncementType;
             status?: AnnouncementStatus;
+            isPinned?: boolean;
+            isFlagged?: boolean;
+            flagReason?: string | null;
         }
     ): Promise<Announcement> {
         const announcement = await this.announcementRepository.findById(id);

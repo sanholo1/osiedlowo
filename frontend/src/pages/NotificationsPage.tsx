@@ -91,6 +91,7 @@ export const NotificationsPage: React.FC = () => {
             case 'NEW_RESPONSE': return { icon: '🙋', label: t('notifications_type_response') };
             case 'OFFER_ACCEPTED': return { icon: '✅', label: t('notifications_type_accepted') };
             case 'NEW_MESSAGE': return { icon: '💬', label: t('notifications_type_message') };
+            case 'SYSTEM_ANNOUNCEMENT': return { icon: '📣', label: 'Ogłoszenie systemowe' };
             default: return { icon: '🔔', label: t('notifications_type_default') };
         }
     };

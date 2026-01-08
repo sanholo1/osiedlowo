@@ -91,4 +91,10 @@ export class MessageRepository {
         const result = await this.repository.delete(id);
         return result.affected !== 0;
     }
+
+    async countByConversation(conversationId: string): Promise<number> {
+        return this.repository.count({
+            where: { conversationId }
+        });
+    }
 }

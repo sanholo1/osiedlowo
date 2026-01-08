@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Chat } from '../components/Chat';
 import { AnnouncementsSection } from '../components/AnnouncementsSection';
+import { UserProfileModal } from '../components/UserProfileModal';
 import { useSettings } from '../contexts/SettingsContext';
 import '../styles/GroupPage.css';
 
@@ -35,8 +36,9 @@ export const GroupPage: React.FC = () => {
     const [conversationId, setConversationId] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
+    const [profileModalUserId, setProfileModalUserId] = useState<string | null>(null);
 
-    
+
     useEffect(() => {
         if (neighborhoodId) {
             fetchNeighborhoodDetails();
@@ -309,7 +311,12 @@ export const GroupPage: React.FC = () => {
                         {neighborhood.members.map((member) => (
                             <li key={member.id} className="member-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <div>
-                                    <strong>{member.firstName} {member.lastName}</strong>
+                                    <strong
+                                        onClick={() => setProfileModalUserId(member.id)}
+                                        style={{ cursor: 'pointer', textDecoration: 'underline' }}
+                                    >
+                                        {member.firstName} {member.lastName}
+                                    </strong>
                                     {member.id === neighborhood.adminId && <span className="member-admin-badge">{t('neigh_role_admin')}</span>}
                                     {member.id === user.id && <span className="member-you-badge">{t('neigh_role_you')}</span>}
                                 </div>
@@ -383,6 +390,14 @@ export const GroupPage: React.FC = () => {
                     </button>
                 )}
             </div>
+
+            {profileModalUserId && (
+                <UserProfileModal
+                    userId={profileModalUserId}
+                    currentUserId={user.id}
+                    onClose={() => setProfileModalUserId(null)}
+                />
+            )}
         </div>
     );
 };
