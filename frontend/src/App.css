@@ -181,8 +181,8 @@ button:hover {
 
 nav {
     display: flex;
-    flex-direction: row;
-    justify-content: space-evenly;
+    flex-direction: column;
+    justify-content: center;
     align-items: center;
     width: 100%;
     background-color: var(--surface-bg);
@@ -192,8 +192,13 @@ nav {
 }
 
 nav>div {
+    padding: 10px;
     min-width: 200px;
     text-align: center;
+}
+
+nav>div>* {
+    padding: 10px;
 }
 
 nav h1 {
@@ -255,6 +260,15 @@ h1 {
     color: var(--text-color);
 }
 
+.datachange-form input {
+    border-radius: 5px;
+    margin-top: 10px;
+    height: 2em
+}
+
+.button-profile-page {
+    margin-top: 10px;
+}
 
 .login-controls {
     position: absolute;
@@ -263,6 +277,20 @@ h1 {
     display: flex;
     gap: 10px;
     align-items: center;
+}
+
+.settings-container>p>* {
+    text-decoration-line: none;
+    padding: var(--button-padd);
+    border: 1px solid var(--border-color);
+    border-radius: var(--bradius);
+    color: var(--border-color);
+    background-color: var(--button-bg);
+}
+
+.settings-container>p>*:hover {
+    background-color: var(--button-hovers);
+    transition: 0.2s;
 }
 
 .theme-toggle-btn {

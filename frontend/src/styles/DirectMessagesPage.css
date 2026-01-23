@@ -2,15 +2,16 @@
 .dm-page-container {
     height: 100vh;
     flex-direction: column;
-    justify-content: flex-start;
+    align-items: center;
     background-color: #f0f2f5;
     padding: 0;
+    width: 100%;
 }
 
 /* Header */
 .dm-header {
-    width: 100%;
-    padding: 10px 20px;
+    max-width: 800px;
+    padding: 10px 10px;
     background-color: white;
     border-bottom: 1px solid #ddd;
     display: flex;
@@ -29,7 +30,7 @@
 
 .dm-back-btn {
     margin-right: 20px;
-    padding: 8px 16px;
+    padding: 8px 8px;
     background-color: #e4e6eb;
     color: black;
     border: none;
@@ -40,8 +41,8 @@
 
 .dm-title {
     margin: 0;
-    font-size: 24px;
-    color: #050505;
+    font-size: 18px;
+    color: #BDD2FA;
 }
 
 .dm-delete-btn {
@@ -60,12 +61,18 @@
 
 /* Main Content Layout */
 .dm-content-layout {
+    max-width: 800px;
     width: 100%;
     max-width: 800px;
     margin: 0 auto;
     height: calc(100vh - 60px);
     display: flex;
     flex-direction: column;
+    align-items: center;
+}
+
+.dm-content-layout>* {
+    width: 100%;
 }
 
 .dm-chat-view {
@@ -89,7 +96,7 @@
 }
 
 .dm-search-input {
-    width: 100%;
+    width: 90%;
     padding: 10px 16px;
     border-radius: 20px;
     border: none;

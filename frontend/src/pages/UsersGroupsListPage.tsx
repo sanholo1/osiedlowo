@@ -133,8 +133,9 @@ export const UsersGroupsListPage: React.FC = () => {
                             border: '1px solid #ddd',
                             borderRadius: '8px',
                             position: 'relative',
-                            backgroundColor: unreadCount > 0 ? '#f0f7ff' : 'white',
-                            borderColor: unreadCount > 0 ? '#667eea' : '#ddd'
+                            backgroundColor: '#0D2249',
+                            borderColor: unreadCount > 0 ? '#667eea' : '#ddd',
+                            color: '#BDD2FA'
                         }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                 <h3>{neighborhood.name}</h3>
@@ -154,8 +155,8 @@ export const UsersGroupsListPage: React.FC = () => {
                                     </div>
                                 )}
                             </div>
-                            <p>{t('neigh_city')}: {neighborhood.city}</p>
-                            <p>{t('neigh_status')}: {neighborhood.isPrivate ? t('neigh_status_private') : t('neigh_status_public')}</p>
+                            <p style={{color: '#BDD2FA'}}>{t('neigh_city')}: {neighborhood.city}</p>
+                            <p style={{color: '#BDD2FA'}}>{t('neigh_status')}: {neighborhood.isPrivate ? t('neigh_status_private') : t('neigh_status_public')}</p>
                             <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
                                 <button
                                     onClick={() => navigate(`/group?id=${neighborhood.id}`)}

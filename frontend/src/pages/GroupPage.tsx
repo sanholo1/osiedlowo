@@ -231,138 +231,136 @@ export const GroupPage: React.FC = () => {
         <div className="home-container">
             <h2>{neighborhood.name}</h2>
 
-            <div className="group-info-section">
-                <h3>{t('neigh_info_section')}</h3>
-                <p><strong>{t('neigh_city')}:</strong> {neighborhood.city}</p>
-                <p><strong>{t('neigh_status')}:</strong> {neighborhood.isPrivate ? t('neigh_status_private') : t('neigh_status_public')}</p>
-                <p><strong>{t('neigh_created_at')}:</strong> {new Date(neighborhood.createdAt).toLocaleDateString(t('appearance_language') === 'Język' ? 'pl-PL' : 'en-US')}</p>
-                <p><strong>{t('neigh_members_count')}:</strong> {neighborhood.members?.length || 0}</p>
-                {isAdmin && <p className="admin-badge">{t('neigh_admin_badge')}</p>}
-            </div>
-
-            {isAdmin && showManagement && (
-                <div style={{
-                    backgroundColor: '#fff3e0',
-                    padding: '15px',
-                    borderRadius: '8px',
-                    marginBottom: '20px',
-                    border: '1px solid #ffcc80'
-                }}>
-                    <h3>{t('neigh_mgmt_title')}</h3>
-                    <p>{t('neigh_mgmt_desc')}</p>
-
-                    {neighborhood.isPrivate && neighborhood.inviteCode && (
-                        <div style={{ margin: '15px 0', padding: '10px', backgroundColor: 'white', borderRadius: '4px', border: '1px dashed #ccc' }}>
-                            <p style={{ margin: '0 0 5px 0', fontWeight: 'bold' }}>{t('neigh_invite_code')}:</p>
-                            <code style={{ fontSize: '1.2em', color: '#d32f2f' }}>{neighborhood.inviteCode}</code>
-                            <p style={{ fontSize: '0.8em', color: '#666', margin: '5px 0 0 0' }}>{t('neigh_invite_desc')}</p>
-                        </div>
-                    )}
-
-                    {neighborhood.isPrivate && (
-                        <div style={{ margin: '15px 0', padding: '10px', backgroundColor: 'white', borderRadius: '4px', border: '1px solid #ccc' }}>
-                            <p style={{ margin: '0 0 5px 0', fontWeight: 'bold' }}>{t('neigh_change_password')}:</p>
-                            <div style={{ display: 'flex', gap: '10px' }}>
-                                <input
-                                    type="password"
-                                    placeholder="Nowe hasło"
-                                    value={newPassword}
-                                    onChange={(e) => setNewPassword(e.target.value)}
-                                    style={{ padding: '5px', borderRadius: '4px', border: '1px solid #ddd' }}
-                                />
-                                <button
-                                    onClick={handleChangePassword}
-                                    style={{
-                                        backgroundColor: '#2196F3',
-                                        color: 'white',
-                                        border: 'none',
-                                        borderRadius: '4px',
-                                        cursor: 'pointer',
-                                        padding: '5px 10px'
-                                    }}
-                                >
-                                    {t('common_save')}
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    <button
-                        onClick={handleDelete}
-                        style={{
-                            backgroundColor: '#d32f2f',
-                            color: 'white',
-                            padding: '10px 20px',
-                            border: 'none',
-                            borderRadius: '5px',
-                            cursor: 'pointer',
-                            marginTop: '10px'
-                        }}
-                    >
-                        {t('neigh_delete_btn')}
-                    </button>
+            <div className="section">
+                <div className="group-info-section">
+                    <h3>{t('neigh_info_section')}</h3>
+                    <p><strong>{t('neigh_city')}:</strong> {neighborhood.city}</p>
+                    <p><strong>{t('neigh_status')}:</strong> {neighborhood.isPrivate ? t('neigh_status_private') : t('neigh_status_public')}</p>
+                    <p><strong>{t('neigh_created_at')}:</strong> {new Date(neighborhood.createdAt).toLocaleDateString(t('appearance_language') === 'Język' ? 'pl-PL' : 'en-US')}</p>
+                    <p><strong>{t('neigh_members_count')}:</strong> {neighborhood.members?.length || 0}</p>
+                    {isAdmin && <p className="admin-badge">{t('neigh_admin_badge')}</p>}
                 </div>
-            )}
-
-            <div className="members-section">
-                <h3>{t('neigh_members_section')} ({neighborhood.members?.length || 0})</h3>
-                {neighborhood.members && neighborhood.members.length > 0 ? (
-                    <ul className="members-list">
-                        {neighborhood.members.map((member) => (
-                            <li key={member.id} className="member-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <div>
-                                    <strong
-                                        onClick={() => setProfileModalUserId(member.id)}
-                                        style={{ cursor: 'pointer', textDecoration: 'underline' }}
-                                    >
-                                        {member.firstName} {member.lastName}
-                                    </strong>
-                                    {member.id === neighborhood.adminId && <span className="member-admin-badge">{t('neigh_role_admin')}</span>}
-                                    {member.id === user.id && <span className="member-you-badge">{t('neigh_role_you')}</span>}
-                                </div>
-                                {isAdmin && member.id !== user.id && (
+                {isAdmin && showManagement && (
+                    <div style={{
+                        backgroundColor: '#0D2249',
+                        padding: '15px',
+                        borderRadius: '8px',
+                        marginBottom: '20px',
+                        border: '1px solid #ccc'
+                    }}>
+                        <h3>{t('neigh_mgmt_title')}</h3>
+                        <p>{t('neigh_mgmt_desc')}</p>
+                        {neighborhood.isPrivate && neighborhood.inviteCode && (
+                            <div style={{ margin: '15px 0', padding: '10px', backgroundColor: 'white', borderRadius: '4px', border: '1px dashed #ccc' }}>
+                                <p style={{ margin: '0 0 5px 0', fontWeight: 'bold' }}>{t('neigh_invite_code')}:</p>
+                                <code style={{ fontSize: '1.2em', color: '#d32f2f' }}>{neighborhood.inviteCode}</code>
+                                <p style={{ fontSize: '0.8em', color: '#666', margin: '5px 0 0 0' }}>{t('neigh_invite_desc')}</p>
+                            </div>
+                        )}
+                        {neighborhood.isPrivate && (
+                            <div style={{ margin: '15px 0', padding: '10px', backgroundColor: 'white', borderRadius: '4px', border: '1px solid #ccc' }}>
+                                <p style={{ margin: '0 0 5px 0', fontWeight: 'bold' }}>{t('neigh_change_password')}:</p>
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <input
+                                        type="password"
+                                        placeholder="Nowe hasło"
+                                        value={newPassword}
+                                        onChange={(e) => setNewPassword(e.target.value)}
+                                        style={{ padding: '5px', borderRadius: '4px', border: '1px solid #ddd' }}
+                                    />
                                     <button
-                                        onClick={() => handleRemoveMember(member.id)}
+                                        onClick={handleChangePassword}
                                         style={{
-                                            backgroundColor: '#ffebee',
-                                            color: '#c62828',
+                                            backgroundColor: '#2196F3',
+                                            color: 'white',
                                             border: 'none',
-                                            padding: '4px 8px',
                                             borderRadius: '4px',
                                             cursor: 'pointer',
-                                            fontSize: '0.9em'
+                                            padding: '5px 10px'
                                         }}
                                     >
-                                        {t('neigh_remove_member_btn') || 'Usuń'}
+                                        {t('common_save')}
                                     </button>
-                                )}
-                            </li>
-                        ))}
-                    </ul>
-                ) : (
-                    <p>{t('neigh_no_members')}</p>
+                                </div>
+                            </div>
+                        )}
+                        <button
+                            onClick={handleDelete}
+                            style={{
+                                backgroundColor: '#d32f2f',
+                                color: 'white',
+                                padding: '10px 20px',
+                                border: 'none',
+                                borderRadius: '5px',
+                                cursor: 'pointer',
+                                marginTop: '10px'
+                            }}
+                        >
+                            {t('neigh_delete_btn')}
+                        </button>
+                    </div>
                 )}
+                <div className="members-section">
+                    <h3>{t('neigh_members_section')} ({neighborhood.members?.length || 0})</h3>
+                    {neighborhood.members && neighborhood.members.length > 0 ? (
+                        <ul className="members-list">
+                            {neighborhood.members.map((member) => (
+                                <li key={member.id} className="member-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <div>
+                                        <strong
+                                            onClick={() => setProfileModalUserId(member.id)}
+                                            style={{ cursor: 'pointer', textDecoration: 'underline' }}
+                                        >
+                                            {member.firstName} {member.lastName}
+                                        </strong>
+                                        {member.id === neighborhood.adminId && <span className="member-admin-badge">{t('neigh_role_admin')}</span>}
+                                        {member.id === user.id && <span className="member-you-badge">{t('neigh_role_you')}</span>}
+                                    </div>
+                                    {isAdmin && member.id !== user.id && (
+                                        <button
+                                            onClick={() => handleRemoveMember(member.id)}
+                                            style={{
+                                                backgroundColor: '#ffebee',
+                                                color: '#c62828',
+                                                border: 'none',
+                                                padding: '4px 8px',
+                                                borderRadius: '4px',
+                                                cursor: 'pointer',
+                                                fontSize: '0.9em'
+                                            }}
+                                        >
+                                            {t('neigh_remove_member_btn') || 'Usuń'}
+                                        </button>
+                                    )}
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p>{t('neigh_no_members')}</p>
+                    )}
+                </div>
             </div>
 
-            {/* Announcements Section */}
-            {neighborhoodId && (
-                <AnnouncementsSection
-                    neighborhoodId={neighborhoodId}
-                    userId={user.id}
-                    isAdmin={isAdmin}
-                />
-            )}
-
-            <div className="chat-section">
-                <h3>{t('neigh_chat_title')}</h3>
-                <div className="chat-container">
-                    {conversationId ? (
-                        <Chat conversationId={conversationId} userId={user.id} />
-                    ) : (
-                        <p className="loading-message">
-                            {t('neigh_chat_loading')}
-                        </p>
-                    )}
+            <div className='section'>
+                {/* Announcements Section */}
+                {neighborhoodId && (
+                    <AnnouncementsSection
+                        neighborhoodId={neighborhoodId}
+                        userId={user.id}
+                        isAdmin={isAdmin}
+                    />
+                )}
+                <div className="chat-section">
+                    <h3>{t('neigh_chat_title')}</h3>
+                    <div className="chat-container">
+                        {conversationId ? (
+                            <Chat conversationId={conversationId} userId={user.id} />
+                        ) : (
+                            <p className="loading-message">
+                                {t('neigh_chat_loading')}
+                            </p>
+                        )}
+                    </div>
                 </div>
             </div>
 

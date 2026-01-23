@@ -334,7 +334,7 @@ export const ProfilePage: React.FC = () => {
                         ⚠️ Konto System Admin nie może edytować profilu. Jest to konto techniczne/serwisowe.
                     </div>
                 )}
-                <form onSubmit={handleSubmit}>
+                <form className='datachange-form' onSubmit={handleSubmit}>
                     <div>
                         <input
                             type="email"
@@ -494,13 +494,13 @@ export const ProfilePage: React.FC = () => {
                         </div>
                     </div>
 
-                    <button type="submit" disabled={isLoading || isSystemAdmin} data-i18n={isLoading ? "profile_saving_btn" : "profile_save_btn"}>
+                    <button className='button-profile-page' type="submit" disabled={isLoading || isSystemAdmin} data-i18n={isLoading ? "profile_saving_btn" : "profile_save_btn"}>
                         {isLoading ? t('profile_saving_btn') : t('profile_save_btn')}
                     </button>
                 </form>
                 {message && <div className={`profile-message ${message.includes('błąd') || message.includes('Błąd') || message.includes('Maksymalna') || message.includes('Error') ? 'error' : 'success'}`}>{message}</div>}
             </div>
-            <button onClick={() => navigate('/home')} data-i18n="back_home">{t('back_home')}</button>
+            <button className='button-profile-page' onClick={() => navigate('/home')} data-i18n="back_home">{t('back_home')}</button>
         </div>
     );
 };

@@ -1,8 +1,16 @@
+.section {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    width:100%;
+}
+
 .group-info-section {
     margin-bottom: 20px;
     padding: 15px;
     border: 1px solid #ccc;
     border-radius: 8px;
+    background-color: #0D2249;
 }
 
 .group-info-section p {
@@ -27,6 +35,7 @@
     padding: 15px;
     border: 1px solid #ccc;
     border-radius: 8px;
+    background-color: #0D2249;
 }
 
 .members-list {
@@ -49,10 +58,12 @@
 }
 
 .chat-section {
+    margin-left: 50px;
     margin-bottom: 20px;
     padding: 15px;
     border: 1px solid #ccc;
     border-radius: 8px;
+    background-color: #0D2249;
 }
 
 .chat-section h3 {
