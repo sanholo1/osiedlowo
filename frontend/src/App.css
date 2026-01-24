@@ -207,6 +207,7 @@ nav h1 {
 }
 
 main {
+    width: 100vw;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
@@ -224,12 +225,12 @@ main>* {
     width: 30%;
     margin-bottom: 20px;
     border-radius: var(--bradius);
-    background-color: var(--card-bg);
+    background: #020024;
+    background: linear-gradient(90deg,rgba(2, 0, 36, 1) 0%, rgba(9, 9, 121, 1) 91%, rgba(11, 11, 161, 1) 100%);
     
     box-shadow: var(--bshadow);
     padding: 20px 10px;
     color: var(--card-text);
-    
 }
 
 .home-container h2 {

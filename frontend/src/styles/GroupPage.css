@@ -10,7 +10,8 @@
     padding: 15px;
     border: 1px solid #ccc;
     border-radius: 8px;
-    background-color: #0D2249;
+    background: #020024;
+    background: linear-gradient(90deg,rgba(2, 0, 36, 1) 0%, rgba(9, 9, 121, 1) 91%, rgba(11, 11, 161, 1) 100%);
 }
 
 .group-info-section p {
@@ -35,7 +36,8 @@
     padding: 15px;
     border: 1px solid #ccc;
     border-radius: 8px;
-    background-color: #0D2249;
+    background: #020024;
+    background: linear-gradient(90deg,rgba(2, 0, 36, 1) 0%, rgba(9, 9, 121, 1) 91%, rgba(11, 11, 161, 1) 100%);
 }
 
 .members-list {
@@ -63,7 +65,8 @@
     padding: 15px;
     border: 1px solid #ccc;
     border-radius: 8px;
-    background-color: #0D2249;
+    background: #020024;
+    background: linear-gradient(90deg,rgba(2, 0, 36, 1) 0%, rgba(9, 9, 121, 1) 91%, rgba(11, 11, 161, 1) 100%);
 }
 
 .chat-section h3 {

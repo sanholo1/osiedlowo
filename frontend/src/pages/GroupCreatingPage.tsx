@@ -84,91 +84,91 @@ export const GroupCreatingPage: React.FC = () => {
     }
 
     return (
-        <div id="neighbourhood-creating-container">
-            <h2>{t('create_neigh_title')}</h2>
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label>{t('create_neigh_name_label')}: </label>
-                    <input
-                        type="text"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        disabled={isLoading || isRedirecting}
-                        required
-                    />
-                </div>
-                <div>
-                    <label>{t('create_neigh_city_label')}: </label>
-                    <input
-                        type="text"
-                        name="city"
-                        value={formData.city}
-                        onChange={handleInputChange}
-                        disabled={isLoading || isRedirecting}
-                        required
-                    />
-                </div>
-                <div>
-                    <h3>{t('create_neigh_status_label')}:</h3>
-                    <label>{t('create_neigh_status_public')}</label>
-                    <input
-                        type="radio"
-                        name="status"
-                        id="neigh-pub"
-                        value="pub"
-                        checked={formData.status === 'pub'}
-                        onChange={handleInputChange}
-                        disabled={isLoading || isRedirecting}
-                    />
-                    <label>{t('create_neigh_status_private')}</label>
-                    <input
-                        type="radio"
-                        name="status"
-                        id="neigh-priv"
-                        value="priv"
-                        checked={formData.status === 'priv'}
-                        onChange={handleInputChange}
-                        disabled={isLoading || isRedirecting}
-                    />
-                </div>
-                {formData.status === 'priv' && (
+        <main>
+            <div id="neighbourhood-creating-container">
+                <h2>{t('create_neigh_title')}</h2>
+                <form onSubmit={handleSubmit}>
                     <div>
-                        <label>{t('create_neigh_password_label')}: </label>
+                        <label>{t('create_neigh_name_label')}: </label>
                         <input
-                            type="password"
-                            name="password"
-                            value={formData.password}
+                            type="text"
+                            name="name"
+                            value={formData.name}
                             onChange={handleInputChange}
                             disabled={isLoading || isRedirecting}
-                            placeholder={t('create_neigh_password_placeholder')}
-                            required={formData.status === 'priv'}
+                            required
                         />
                     </div>
+                    <div>
+                        <label>{t('create_neigh_city_label')}: </label>
+                        <input
+                            type="text"
+                            name="city"
+                            value={formData.city}
+                            onChange={handleInputChange}
+                            disabled={isLoading || isRedirecting}
+                            required
+                        />
+                    </div>
+                    <div>
+                        <h3>{t('create_neigh_status_label')}:</h3>
+                        <label>{t('create_neigh_status_public')}</label>
+                        <input
+                            type="radio"
+                            name="status"
+                            id="neigh-pub"
+                            value="pub"
+                            checked={formData.status === 'pub'}
+                            onChange={handleInputChange}
+                            disabled={isLoading || isRedirecting}
+                        />
+                        <label>{t('create_neigh_status_private')}</label>
+                        <input
+                            type="radio"
+                            name="status"
+                            id="neigh-priv"
+                            value="priv"
+                            checked={formData.status === 'priv'}
+                            onChange={handleInputChange}
+                            disabled={isLoading || isRedirecting}
+                        />
+                    </div>
+                    {formData.status === 'priv' && (
+                        <div>
+                            <label>{t('create_neigh_password_label')}: </label>
+                            <input
+                                type="password"
+                                name="password"
+                                value={formData.password}
+                                onChange={handleInputChange}
+                                disabled={isLoading || isRedirecting}
+                                placeholder={t('create_neigh_password_placeholder')}
+                                required={formData.status === 'priv'}
+                            />
+                        </div>
+                    )}
+                    <button type="submit" disabled={isLoading || isRedirecting}>
+                        {isLoading ? t('create_neigh_loading') : t('create_neigh_submit')}
+                    </button>
+                </form>
+                {message && (
+                    <div className={`group-creating-message ${message.includes('błąd') || message.includes('Błąd') ? 'error' : 'success'}`}>
+                        {message}
+                    </div>
                 )}
-                <button type="submit" disabled={isLoading || isRedirecting}>
-                    {isLoading ? t('create_neigh_loading') : t('create_neigh_submit')}
+                {isRedirecting && (
+                    <div className="progress-bar-container">
+                        <div className="progress-bar-fill"></div>
+                    </div>
+                )}
+                <button
+                    onClick={() => navigate('/home')}
+                    disabled={isLoading || isRedirecting}
+                    className="back-button"
+                >
+                    {t('back_home')}
                 </button>
-            </form>
-            {message && (
-                <div className={`group-creating-message ${message.includes('błąd') || message.includes('Błąd') ? 'error' : 'success'}`}>
-                    {message}
-                </div>
-            )}
-
-            {isRedirecting && (
-                <div className="progress-bar-container">
-                    <div className="progress-bar-fill"></div>
-                </div>
-            )}
-
-            <button
-                onClick={() => navigate('/home')}
-                disabled={isLoading || isRedirecting}
-                className="back-button"
-            >
-                {t('back_home')}
-            </button>
-        </div>
+            </div>
+        </main>
     );
 };
