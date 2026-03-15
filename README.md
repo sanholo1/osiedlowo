@@ -1,3 +1,7 @@
+Sem. 5 IO Projekt
+W trakcie prac / Nieskończony
+Dokumentacja: [sasiedzka_pomoc_final.pdf](sasiedzka_pomoc_final.pdf).
+
 ### 1️⃣ Sklonuj projekt
 ```bash
 git clone https://github.com/sanholo1/osiedlowo.git
