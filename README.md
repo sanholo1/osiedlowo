@@ -1,6 +1,7 @@
 ### Sem. 5 IO Projekt
 W trakcie prac / Nieskończony
-Dokumentacja: [sasiedzka_pomoc_final.pdf](sasiedzka_pomoc_final.pdf).
+
+Dokumentacja: [dokumentacja.pdf](docs/dokumentacja.pdf).
 
 ### 1️⃣ Sklonuj projekt
 ```bash
