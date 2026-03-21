@@ -1,0 +1,46 @@
+@startuml sequence_02_user_login
+
+actor "Użytkownik" as User
+participant ":LoginPage" as UI <<Presentation>>
+participant ":AuthService" as AuthSvc <<Business Logic>>
+participant ":UserRepository" as UserRepo <<Data Access>>
+participant ":PasswordHasher" as Hasher <<Infrastructure>>
+participant ":JwtService" as JWT <<Infrastructure>>
+database ":MySQL" as DB <<Database>>
+
+User -> UI: wprowadza email i hasło
+activate UI
+
+UI -> UI: handleLogin()
+UI -> AuthSvc: login(credentials)
+activate AuthSvc
+
+AuthSvc -> UserRepo: findByEmail(email)
+activate UserRepo
+UserRepo -> DB: SELECT * FROM users WHERE email = ?
+activate DB
+DB --> UserRepo: user_data
+deactivate DB
+UserRepo --> AuthSvc: user
+deactivate UserRepo
+
+AuthSvc -> Hasher: verify(password, user.password)
+activate Hasher
+Hasher --> AuthSvc: true
+deactivate Hasher
+
+AuthSvc -> JWT: generateToken(user)
+activate JWT
+JWT --> AuthSvc: accessToken
+deactivate JWT
+
+
+AuthSvc --> UI: {accessToken, user}
+deactivate AuthSvc
+
+UI -> UI: zapisuje token w pamięci
+UI -> UI: redirectToDashboard()
+UI --> User: przekierowuje do Dashboard
+deactivate UI
+
+@enduml
