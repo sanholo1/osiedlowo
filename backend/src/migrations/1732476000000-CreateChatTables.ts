@@ -2,6 +2,7 @@ import { MigrationInterface, QueryRunner, Table, TableForeignKey } from "typeorm
 
 export class CreateChatTables1732476000000 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<void> {
+        // Create conversations table
         await queryRunner.createTable(
             new Table({
                 name: "conversations",
@@ -47,6 +48,7 @@ export class CreateChatTables1732476000000 implements MigrationInterface {
             true
         );
 
+        // Create messages table
         await queryRunner.createTable(
             new Table({
                 name: "messages",
@@ -93,6 +95,7 @@ export class CreateChatTables1732476000000 implements MigrationInterface {
             true
         );
 
+        // Create conversation_participants table
         await queryRunner.createTable(
             new Table({
                 name: "conversation_participants",
@@ -129,10 +132,12 @@ export class CreateChatTables1732476000000 implements MigrationInterface {
             true
         );
 
+        // Add username column to users table
         await queryRunner.query(
             `ALTER TABLE users ADD COLUMN username VARCHAR(255) NULL UNIQUE AFTER email`
         );
 
+        // Add foreign keys for messages
         await queryRunner.createForeignKey(
             "messages",
             new TableForeignKey({
@@ -153,6 +158,7 @@ export class CreateChatTables1732476000000 implements MigrationInterface {
             })
         );
 
+        // Add foreign keys for conversation_participants
         await queryRunner.createForeignKey(
             "conversation_participants",
             new TableForeignKey({
@@ -173,6 +179,7 @@ export class CreateChatTables1732476000000 implements MigrationInterface {
             })
         );
 
+        // Create indexes for better query performance
         await queryRunner.query(
             `CREATE INDEX idx_messages_conversation_id ON messages(conversationId)`
         );
@@ -191,12 +198,14 @@ export class CreateChatTables1732476000000 implements MigrationInterface {
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
+        // Drop indexes
         await queryRunner.query(`DROP INDEX idx_users_username ON users`);
         await queryRunner.query(`DROP INDEX idx_conversation_participants_user_id ON conversation_participants`);
         await queryRunner.query(`DROP INDEX idx_conversation_participants_conversation_id ON conversation_participants`);
         await queryRunner.query(`DROP INDEX idx_messages_sender_id ON messages`);
         await queryRunner.query(`DROP INDEX idx_messages_conversation_id ON messages`);
 
+        // Drop foreign keys
         const messagesTable = await queryRunner.getTable("messages");
         const conversationParticipantsTable = await queryRunner.getTable("conversation_participants");
 
@@ -214,10 +223,12 @@ export class CreateChatTables1732476000000 implements MigrationInterface {
             }
         }
 
+        // Drop tables
         await queryRunner.dropTable("conversation_participants");
         await queryRunner.dropTable("messages");
         await queryRunner.dropTable("conversations");
 
+        // Remove username column from users table
         await queryRunner.query(`ALTER TABLE users DROP COLUMN username`);
     }
 }

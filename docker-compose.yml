@@ -57,21 +57,13 @@ services:
     container_name: osiedlowo_frontend
     restart: unless-stopped
     environment:
-      REACT_APP_API_URL: http://localhost:3001/api
+      REACT_APP_API_URL: http://localhost:3001
       HOST: 0.0.0.0
       PORT: 3000
-      WATCHPACK_POLLING: "true" # Poprawia działanie hot-reload na Windows (WSL2)
-      CHOKIDAR_USEPOLLING: "true"
     ports:
       - "3000:3000"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
     networks:
       - osiedlowo_network
-    depends_on:
-      - backend # Frontend startuje po backendzie
-    command: npm start
 
 volumes:
   mysql_data:

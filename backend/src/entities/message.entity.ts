@@ -28,7 +28,7 @@ export class Message {
         type: 'json',
         nullable: true
     })
-    readBy: string[]; 
+    readBy: string[]; // Array of user IDs who read the message
 
     @ManyToOne(() => Conversation, conversation => conversation.messages, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'conversationId' })

@@ -13,9 +13,10 @@ export class UserController {
 
   register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
+      // Walidacja DTO
       const createUserDto = plainToInstance(CreateUserDto, req.body);
       const errors = await validate(createUserDto);
-
+      
       if (errors.length > 0) {
         const messages = errors.map(err => Object.values(err.constraints || {})).flat();
         res.status(400).json({
@@ -41,9 +42,10 @@ export class UserController {
 
   login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
+      // Walidacja DTO
       const loginUserDto = plainToInstance(LoginUserDto, req.body);
       const errors = await validate(loginUserDto);
-
+      
       if (errors.length > 0) {
         const messages = errors.map(err => Object.values(err.constraints || {})).flat();
         res.status(400).json({
@@ -85,13 +87,7 @@ export class UserController {
     try {
       const { id } = req.params;
       const user = await this.userService.findById(id);
-
-      
-      const { RatingService } = await import('../services/rating.service');
-      const ratingService = new RatingService();
-      const ratingStats = await ratingService.getRatingStats(id);
-
-      const responseDto = UserResponseDto.fromEntity(user, ratingStats);
+      const responseDto = UserResponseDto.fromEntity(user);
 
       res.json({
         status: 'OK',
@@ -104,15 +100,10 @@ export class UserController {
 
   getProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
+      // User ID pochodzi z middleware auth
       const userId = (req as any).user.userId;
       const user = await this.userService.findById(userId);
-
-      
-      const { RatingService } = await import('../services/rating.service');
-      const ratingService = new RatingService();
-      const ratingStats = await ratingService.getRatingStats(userId);
-
-      const responseDto = UserResponseDto.fromEntity(user, ratingStats);
+      const responseDto = UserResponseDto.fromEntity(user);
 
       res.json({
         status: 'OK',
@@ -125,20 +116,12 @@ export class UserController {
 
   update = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const userRole = (req as any).user?.role;
-      const userId = req.params.id || (req as any).user.userId;
+      const { id } = req.params;
 
-      if (userRole === 'admin') {
-        res.status(403).json({
-          status: 'ERROR',
-          message: 'System Admin nie może edytować profilu. Jest to konto techniczne/serwisowe.'
-        });
-        return;
-      }
-
+      // Walidacja DTO
       const updateUserDto = plainToInstance(UpdateUserDto, req.body);
       const errors = await validate(updateUserDto);
-
+      
       if (errors.length > 0) {
         const messages = errors.map(err => Object.values(err.constraints || {})).flat();
         res.status(400).json({
@@ -149,7 +132,7 @@ export class UserController {
         return;
       }
 
-      const user = await this.userService.update(userId, updateUserDto);
+      const user = await this.userService.update(id, updateUserDto);
       const responseDto = UserResponseDto.fromEntity(user);
 
       res.json({
@@ -207,52 +190,4 @@ export class UserController {
       next(error);
     }
   };
-
-  blockUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const userId = (req as any).user.userId;
-      const { blockedUserId } = req.params;
-
-      await this.userService.blockUser(userId, blockedUserId);
-
-      res.json({
-        status: 'OK',
-        message: 'Użytkownik został zablokowany'
-      });
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  unblockUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const userId = (req as any).user.userId;
-      const { blockedUserId } = req.params;
-
-      await this.userService.unblockUser(userId, blockedUserId);
-
-      res.json({
-        status: 'OK',
-        message: 'Użytkownik został odblokowany'
-      });
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  getBlockedUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const userId = (req as any).user.userId;
-
-      const blockedUsers = await this.userService.getBlockedUsers(userId);
-
-      res.json({
-        status: 'OK',
-        data: blockedUsers
-      });
-    } catch (error) {
-      next(error);
-    }
-  };
 }
-

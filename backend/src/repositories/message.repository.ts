@@ -9,15 +9,13 @@ export class MessageRepository {
         limit: number = 50,
         offset: number = 0
     ): Promise<Message[]> {
-        const messages = await this.repository.find({
+        return this.repository.find({
             where: { conversationId },
             relations: ['sender'],
             order: { createdAt: 'DESC' },
             take: limit,
             skip: offset,
         });
-
-        return messages.reverse();
     }
 
     async findById(id: string): Promise<Message | null> {
@@ -35,6 +33,7 @@ export class MessageRepository {
         const message = this.repository.create(data);
         const savedMessage = await this.repository.save(message);
 
+        // Reload with relations
         return this.findById(savedMessage.id) as Promise<Message>;
     }
 
@@ -84,17 +83,6 @@ export class MessageRepository {
             where: { conversationId },
             relations: ['sender'],
             order: { createdAt: 'DESC' },
-        });
-    }
-
-    async delete(id: string): Promise<boolean> {
-        const result = await this.repository.delete(id);
-        return result.affected !== 0;
-    }
-
-    async countByConversation(conversationId: string): Promise<number> {
-        return this.repository.count({
-            where: { conversationId }
         });
     }
 }

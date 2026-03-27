@@ -34,6 +34,7 @@ export class ChatController {
                     dto.participantIds[0]
                 );
             } else {
+                // Group conversation
                 const allParticipants = [userId, ...dto.participantIds];
                 conversation = await this.chatService.createGroupConversation(
                     dto.name || 'Grupa',
@@ -101,46 +102,10 @@ export class ChatController {
 
             const users = await this.chatService.searchUsersByName(query, userId);
 
+            // Remove password from response
             const sanitizedUsers = users.map(user => user.toJSON());
 
             res.json(sanitizedUsers);
-        } catch (error) {
-            next(error);
-        }
-    };
-    deleteConversation = async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const userId = (req as any).user.userId;
-            const { id } = req.params;
-
-            await this.chatService.deleteConversation(id, userId);
-            res.json({ message: 'Konwersacja została usunięta' });
-        } catch (error) {
-            next(error);
-        }
-    };
-
-    deleteMessage = async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const userId = (req as any).user.userId;
-            const userRole = (req as any).user.role;
-            const { messageId } = req.params;
-
-            const result = await this.chatService.deleteMessage(messageId, userId, userRole);
-            res.json({
-                message: 'Wiadomość została usunięta',
-                conversationId: result.conversationId
-            });
-        } catch (error) {
-            next(error);
-        }
-    };
-
-    getUnreadCount = async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const userId = (req as any).user.userId;
-            const count = await this.chatService.getTotalUnreadCount(userId);
-            res.json({ count });
         } catch (error) {
             next(error);
         }

@@ -5,18 +5,16 @@ import { authMiddleware } from '../middleware/auth.middleware';
 const router = Router();
 const userController = new UserController();
 
+// Publiczne endpointy
 router.post('/register', userController.register);
 router.post('/login', userController.login);
 
+// Chronione endpointy - wymagają autoryzacji
 router.get('/profile', authMiddleware, userController.getProfile);
 router.put('/profile', authMiddleware, userController.update);
 router.post('/change-password', authMiddleware, userController.changePassword);
 
-
-router.post('/block/:blockedUserId', authMiddleware, userController.blockUser);
-router.delete('/block/:blockedUserId', authMiddleware, userController.unblockUser);
-router.get('/blocked', authMiddleware, userController.getBlockedUsers);
-
+// Endpointy administracyjne (TODO: dodać middleware sprawdzający rolę admin)
 router.get('/', authMiddleware, userController.getAll);
 router.get('/:id', authMiddleware, userController.getById);
 router.put('/:id', authMiddleware, userController.update);
