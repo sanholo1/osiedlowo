@@ -22,7 +22,7 @@ export const AppDataSource = new DataSource({
   username: appConfig.database.username,
   password: appConfig.database.password,
   database: appConfig.database.database,
-  synchronize: false,
+  synchronize: true,
   logging: false,
   entities: [User, Conversation, Message, ConversationParticipant, Neighborhood, Announcement, AnnouncementResponse, AnnouncementView, Notification, BlockedUser, Rating, AdminLog, SystemAnnouncement],
 

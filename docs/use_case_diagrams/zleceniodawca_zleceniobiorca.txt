@@ -1,0 +1,40 @@
+@startuml
+left to right direction
+
+actor "Zleceniobiorca" as Contractor 
+actor "Zleceniodawca" as Employer
+
+rectangle "System Sąsiedzkiej Pomocy" {
+
+
+  ' Zleceniodawca
+  usecase "Tworzenie ogłoszeń" as UC1
+  usecase "Edycja własnych ogłoszeń" as UC2
+  usecase "Usuwanie własnych ogłoszeń" as UC3
+  usecase "Zmiana statusu zleceń" as UC5
+  usecase "Ocenianie Zleceniobiorców" as UC6
+
+  ' Zleceniobiorca
+  usecase "Zgłaszanie wykonania zlecenia" as UC8
+  usecase "Zmiana statusu realizacji" as UC9
+  usecase "Ocenianie Zleceniodawców" as UC10
+
+  ' Podstawowe relacje
+
+
+  UC8 ..> UC9 : <<include>>
+
+  UC8 <.. UC10 : <<extend>>
+}
+
+Contractor --> UC8
+Contractor --> UC9
+Contractor --> UC10
+
+
+Employer --> UC1
+Employer --> UC2
+Employer --> UC3
+Employer --> UC5
+Employer --> UC6
+@enduml
