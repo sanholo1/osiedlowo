@@ -2,13 +2,10 @@ import { Router } from 'express';
 import userRoutes from './user.routes';
 import chatRoutes from './chat.routes';
 import neighborhoodRoutes from './neighborhood.routes';
-import announcementRoutes from './announcement.routes';
-import notificationRoutes from './notification.routes';
-import ratingRoutes from './rating.routes';
-import adminRoutes from './admin.routes';
 
 const router = Router();
 
+// Health check endpoint
 router.get('/health', (req, res) => {
   res.json({
     status: 'OK',
@@ -18,14 +15,11 @@ router.get('/health', (req, res) => {
   });
 });
 
+// Module routes
 router.use('/users', userRoutes);
 router.use('/chat', chatRoutes);
-router.use('/', announcementRoutes);
-router.use('/', notificationRoutes);
 router.use('/neighborhoods', neighborhoodRoutes);
-router.use('/ratings', ratingRoutes);
-router.use('/admin', adminRoutes);
+
+
 
 export default router;
-
-

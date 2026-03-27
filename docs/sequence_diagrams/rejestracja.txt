@@ -1,0 +1,58 @@
+@startuml sequence_01_user_registration
+
+actor "Użytkownik" as User
+participant ":RegisterPage" as UI <<Presentation>>
+participant ":ValidationService" as Validator <<Infrastructure>>
+participant ":AuthService" as AuthSvc <<Business Logic>>
+participant ":PasswordHasher" as Hasher <<Infrastructure>>
+participant ":UserRepository" as UserRepo <<Data Access>>
+database ":MySQL" as DB <<Database>>
+
+User -> UI: wypełnia formularz rejestracji
+activate UI
+
+UI -> UI: handleSubmit()
+UI -> Validator: validateEmail(email)
+activate Validator
+Validator --> UI: true
+deactivate Validator
+
+UI -> Validator: validatePassword(password)
+activate Validator
+Validator --> UI: true
+deactivate Validator
+
+UI -> AuthSvc: register(userData)
+activate AuthSvc
+
+AuthSvc -> UserRepo: findByEmail(email)
+activate UserRepo
+UserRepo -> DB: SELECT * FROM users WHERE email = ?
+activate DB
+DB --> UserRepo: null
+deactivate DB
+UserRepo --> AuthSvc: null
+deactivate UserRepo
+
+AuthSvc -> Hasher: hash(password)
+activate Hasher
+Hasher --> AuthSvc: hashedPassword
+deactivate Hasher
+
+AuthSvc -> UserRepo: save(newUser)
+activate UserRepo
+UserRepo -> DB: INSERT INTO users (...)
+activate DB
+DB --> UserRepo: user_id
+deactivate DB
+UserRepo --> AuthSvc: savedUser
+deactivate UserRepo
+
+AuthSvc --> UI: user
+deactivate AuthSvc
+
+UI -> UI: redirectToDashboard()
+UI --> User: wyświetla Dashboard
+deactivate UI
+
+@enduml

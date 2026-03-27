@@ -1,0 +1,76 @@
+@startuml domain_enums
+title Warstwa Modelu Domenowego - Enumeracje
+
+package "Domain Enumerations" {
+  
+  enum AnnouncementCategory {
+    ZAKUPY
+    OPIEKA_NAD_ZWIERZETAMI
+    DROBNE_NAPRAWY
+    POMOC_OGRODNICZA
+    INNE
+  }
+  
+  enum AnnouncementType {
+    OFERTA
+    PROSBA
+  }
+  
+  enum AnnouncementStatus {
+    OCZEKUJACE
+    ZAAKCEPTOWANE
+    ZAKONCZONE
+  }
+  
+  enum AssignmentStatus {
+    OCZEKUJACE
+    ZAAKCEPTOWANE
+    W_TRAKCIE
+    ZAKONCZONE
+  }
+  
+  enum MembershipRole {
+    MEMBER
+    ADMIN
+  }
+  
+  enum MembershipStatus {
+    PENDING
+    ACTIVE
+    BLOCKED
+  }
+  
+  enum ChatType {
+    PRIVATE
+    GROUP
+  }
+}
+
+class Announcement {
+  - category: AnnouncementCategory
+  - type: AnnouncementType
+  - status: AnnouncementStatus
+}
+
+class Assignment {
+  - status: AssignmentStatus
+}
+
+class Membership {
+  - role: MembershipRole
+  - status: MembershipStatus
+}
+
+class Chat {
+  - type: ChatType
+}
+
+Announcement --> AnnouncementCategory
+Announcement --> AnnouncementType
+Announcement --> AnnouncementStatus
+Assignment --> AssignmentStatus
+Membership --> MembershipRole
+Membership --> MembershipStatus
+Chat --> ChatType
+
+@enduml

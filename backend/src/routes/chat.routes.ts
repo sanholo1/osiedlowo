@@ -5,17 +5,16 @@ import { authMiddleware } from '@middleware/auth.middleware';
 const router = Router();
 const chatController = new ChatController();
 
+// All chat routes require authentication
 router.use(authMiddleware);
 
+// Conversation routes
 router.post('/conversations', chatController.createConversation);
 router.get('/conversations', chatController.getUserConversations);
 router.get('/conversations/:id/messages', chatController.getConversationMessages);
 router.post('/conversations/:id/read', chatController.markAsRead);
-router.delete('/conversations/:id', chatController.deleteConversation);
 
+// User search
 router.get('/users/search', chatController.searchUsers);
-router.get('/unread-count', chatController.getUnreadCount);
-router.delete('/messages/:messageId', chatController.deleteMessage);
 
 export default router;
-

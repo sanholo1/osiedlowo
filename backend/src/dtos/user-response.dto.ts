@@ -5,33 +5,21 @@ export class UserResponseDto {
   email: string;
   firstName: string;
   lastName: string;
-  address: string;
-  attributes: string[];
   role: string;
   isActive: boolean;
-  averageRating?: number;
-  totalRatings?: number;
   createdAt: Date;
   updatedAt: Date;
 
-  static fromEntity(user: User, ratingStats?: { average: number; count: number }): UserResponseDto {
+  static fromEntity(user: User): UserResponseDto {
     const dto = new UserResponseDto();
     dto.id = user.id;
     dto.email = user.email;
     dto.firstName = user.firstName;
     dto.lastName = user.lastName;
-    dto.address = user.address;
-    dto.attributes = user.attributes;
     dto.role = user.role;
     dto.isActive = user.isActive;
     dto.createdAt = user.createdAt;
     dto.updatedAt = user.updatedAt;
-
-    if (ratingStats) {
-      dto.averageRating = ratingStats.average;
-      dto.totalRatings = ratingStats.count;
-    }
-
     return dto;
   }
 

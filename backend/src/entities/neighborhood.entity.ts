@@ -12,15 +12,6 @@ export class Neighborhood {
     @Column({ type: 'varchar', length: 255 })
     city: string;
 
-    @Column({ type: 'boolean', default: false })
-    isPrivate: boolean;
-
-    @Column({ type: 'varchar', length: 255, nullable: true })
-    password: string;
-
-    @Column({ type: 'varchar', length: 10, nullable: true })
-    inviteCode: string;
-
     @Column({ type: 'varchar', length: '36', nullable: true })
     adminId: string;
 

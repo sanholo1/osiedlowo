@@ -1,0 +1,145 @@
+@startuml domain_layer
+title Warstwa Modelu Domenowego
+
+package "Domain Layer" {
+  
+  class User {
+    - id: Long
+    - email: String
+    - password: String
+    - firstName: String
+    - lastName: String
+    - address: String
+    - createdAt: DateTime
+    - reputation: Float
+    + getFullName(): String
+    + updateProfile(data): void
+    + validatePassword(password): boolean
+  }
+  
+  class Neighborhood {
+    - id: Long
+    - name: String
+    - description: String
+    - address: String
+    - createdAt: DateTime
+    - adminId: Long
+    + addMember(user): void
+    + removeMember(userId): void
+    + isAdmin(userId): boolean
+  }
+  
+  class Membership {
+    - id: Long
+    - userId: Long
+    - neighborhoodId: Long
+    - role: MembershipRole
+    - joinedAt: DateTime
+    - status: MembershipStatus
+  }
+  
+  class Announcement {
+    - id: Long
+    - title: String
+    - description: String
+    - category: AnnouncementCategory
+    - type: AnnouncementType
+    - authorId: Long
+    - neighborhoodId: Long
+    - status: AnnouncementStatus
+    - createdAt: DateTime
+    + isEditable(): boolean
+    + canBeAccepted(): boolean
+  }
+  
+  class Assignment {
+    - id: Long
+    - announcementId: Long
+    - clientId: Long
+    - contractorId: Long
+    - status: AssignmentStatus
+    - startDate: DateTime
+    - completionDate: DateTime
+    + updateStatus(newStatus): void
+    + complete(): void
+    + canBeRated(): boolean
+  }
+  
+  class Rating {
+    - id: Long
+    - assignmentId: Long
+    - ratingUserId: Long
+    - ratedUserId: Long
+    - stars: Integer
+    - comment: String
+    - createdAt: DateTime
+    + validate(): boolean
+  }
+  
+  class Skill {
+    - id: Long
+    - userId: Long
+    - name: String
+    - description: String
+  }
+  
+  class Chat {
+    - id: Long
+    - type: ChatType
+    - neighborhoodId: Long
+    - createdAt: DateTime
+    + addParticipant(userId): void
+    + removeParticipant(userId): void
+    + isGroupChat(): boolean
+  }
+  
+  class ChatParticipant {
+    - id: Long
+    - chatId: Long
+    - userId: Long
+    - joinedAt: DateTime
+    - isBlocked: Boolean
+  }
+  
+  class Message {
+    - id: Long
+    - chatId: Long
+    - senderId: Long
+    - content: String
+    - sentAt: DateTime
+    - isRead: Boolean
+    + markAsRead(): void
+  }
+  
+  ' Relacje
+  User "1" -- "0..*" Skill : posiada >
+  User "1" -- "0..*" Membership : uczestniczy >
+  Neighborhood "1" *-- "0..*" Membership : zawiera >
+  Neighborhood "1" -- "0..*" Announcement : zawiera >
+  Neighborhood "1" -- "0..1" Chat : ma >
+  
+  Announcement "1" -- "0..1" Assignment : generuje >
+  Assignment "1" -- "1" User : zleceniodawca >
+  Assignment "1" -- "1" User : zleceniobiorca >
+  Assignment "1" -- "0..2" Rating : otrzymuje >
+  
+  Chat "1" *-- "0..*" ChatParticipant : zawiera >
+  Chat "1" *-- "0..*" Message : zawiera >
+  Message "*" -- "1" User : wysłana przez >
+  
+  Rating "*" -- "1" User : oceniany >
+  Rating "*" -- "1" User : oceniający >
+  
+  note right of User
+    Główna encja reprezentująca
+    użytkownika systemu
+  end note
+  
+  note bottom of Assignment
+    Cykl życia zlecenia:
+    OCZEKUJĄCE -> ZAAKCEPTOWANE
+    -> W_TRAKCIE -> ZAKOŃCZONE
+  end note
+}
+
+@enduml

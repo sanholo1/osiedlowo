@@ -1,0 +1,120 @@
+@startuml sequence_06_complete_and_rate
+
+actor "Zleceniodawca" as User
+participant ":AssignmentDetailPage" as AssignUI <<Presentation>>
+participant ":AuthMiddleware" as Auth <<Infrastructure>>
+participant ":AssignmentService" as AssSvc <<Business Logic>>
+participant ":AssignmentRepository" as AssRepo <<Data Access>>
+participant "assgn:Assignment" as AssEntity <<Domain>>
+participant ":RatingPage" as RatingUI <<Presentation>>
+participant ":RatingService" as RatingSvc <<Business Logic>>
+participant ":Rating" as RatingEntity <<Domain>>
+participant ":RatingRepository" as RatingRepo <<Data Access>>
+participant ":UserRepository" as UserRepo <<Data Access>>
+database ":MySQL" as DB <<Database>>
+
+User -> AssignUI: klika "Oznacz jako zakończone"
+activate AssignUI
+
+AssignUI -> Auth: authenticate(token)
+activate Auth
+Auth --> AssignUI: userId
+deactivate Auth
+
+AssignUI -> AssSvc: completeAssignment(assignmentId)
+activate AssSvc
+
+AssSvc -> AssRepo: findById(assignmentId)
+activate AssRepo
+AssRepo -> DB: SELECT * FROM assignments\nWHERE id = ?
+activate DB
+DB --> AssRepo: assignment_data
+deactivate DB
+AssRepo --> AssSvc: assignment
+deactivate AssRepo
+
+AssSvc -> AssEntity: complete()
+activate AssEntity
+AssEntity -> AssEntity: status = ZAKONCZONE\ncompletionDate = now()
+AssEntity --> AssSvc: 
+deactivate AssEntity
+
+AssSvc ->> AssRepo: update(assignment)
+activate AssRepo
+AssRepo -> DB: UPDATE assignments SET status = ?,\ncompletion_date = ?
+activate DB
+DB --> AssRepo: success
+deactivate DB
+deactivate AssRepo
+
+AssSvc --> AssignUI: completedAssignment
+deactivate AssSvc
+
+AssignUI --> User: przekierowuje do RatingPage
+deactivate AssignUI
+
+opt wypełnianie formularza oceny
+    User -> RatingUI: wypełnia formularz oceny\n(gwiazdki + komentarz)
+    activate RatingUI
+    
+    RatingUI -> Auth: authenticate(token)
+    activate Auth
+    Auth --> RatingUI: userId
+    deactivate Auth
+    
+    RatingUI -> RatingSvc: createRating(ratingData)
+    activate RatingSvc
+    
+    RatingSvc -> AssRepo: findById(assignmentId)
+    activate AssRepo
+    AssRepo -> DB: SELECT * FROM assignments\nWHERE id = ?
+    activate DB
+    DB --> AssRepo: assignment_data
+    deactivate DB
+    AssRepo --> RatingSvc: assignment
+    deactivate AssRepo
+    
+    create RatingEntity
+    RatingSvc ->> RatingEntity: <<create>>(data)
+    RatingSvc -> RatingEntity: validate()
+    activate RatingEntity
+    RatingEntity --> RatingSvc: true
+    deactivate RatingEntity
+    
+    RatingSvc -> RatingRepo: save(rating)
+    activate RatingRepo
+    RatingRepo -> DB: INSERT INTO ratings (...)
+    activate DB
+    DB --> RatingRepo: rating_id
+    deactivate DB
+    RatingRepo --> RatingSvc: savedRating
+    deactivate RatingRepo
+    
+    RatingSvc -> RatingSvc: calculateUserReputation(ratedUserId)
+    RatingSvc -> RatingRepo: findByRatedUserId(ratedUserId)
+    activate RatingRepo
+    RatingRepo -> DB: SELECT * FROM ratings\nWHERE rated_user_id = ?
+    activate DB
+    DB --> RatingRepo: ratings
+    deactivate DB
+    RatingRepo --> RatingSvc: ratingsList
+    deactivate RatingRepo
+    
+    RatingSvc -> RatingSvc: oblicza średnią ocen
+    
+    RatingSvc ->> UserRepo: update(userId,{reputation: avgRating})
+    activate UserRepo
+    UserRepo -> DB: UPDATE users\nSET reputation = ?
+    activate DB
+    DB --> UserRepo: success
+    deactivate DB
+    deactivate UserRepo
+    
+    RatingSvc --> RatingUI: rating
+    deactivate RatingSvc
+    
+    RatingUI --> User: wyświetla potwierdzenie
+    deactivate RatingUI
+end
+
+@enduml
