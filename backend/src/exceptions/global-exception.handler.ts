@@ -11,21 +11,25 @@ export const globalExceptionHandler = (
   let message = 'Wewnętrzny błąd serwera';
   let status = 'error';
 
+  // Obsługa HttpException (nasz system wyjątków)
   if (err instanceof HttpException) {
     statusCode = err.statusCode;
     message = err.message;
     status = err.status;
   }
+  // Obsługa błędów TypeORM
   else if (err.name === 'QueryFailedError') {
     statusCode = 400;
     message = 'Błąd zapytania do bazy danych';
     status = 'fail';
   }
+  // Obsługa błędów walidacji
   else if (err.name === 'ValidationError') {
     statusCode = 400;
     message = 'Błąd walidacji danych';
     status = 'fail';
   }
+  // Obsługa błędów JWT
   else if (err.name === 'JsonWebTokenError') {
     statusCode = 401;
     message = 'Nieprawidłowy token';
@@ -37,6 +41,7 @@ export const globalExceptionHandler = (
     status = 'fail';
   }
 
+  // Logowanie w development
   if (process.env.NODE_ENV === 'development') {
     console.error('Error:', err);
   }

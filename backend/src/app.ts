@@ -9,6 +9,7 @@ import routes from './routes';
 import { globalExceptionHandler } from './exceptions';
 import { initializeSocket } from './socket';
 
+// Załaduj zmienne środowiskowe
 config({ path: '../.env' });
 
 class App {
@@ -28,22 +29,33 @@ class App {
   }
 
   private initializeMiddlewares(): void {
+    // CORS configuration
     this.app.use(cors({
       origin: appConfig.corsOrigin,
       credentials: true,
     }));
 
+    // Body parsing
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
 
+    // Serve static files from public directory
     this.app.use(express.static('public'));
 
-
+    // Request logging (development only)
+    if (appConfig.nodeEnv === 'development') {
+      this.app.use((req, res, next) => {
+        console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+        next();
+      });
+    }
   }
 
   private initializeRoutes(): void {
+    // API routes
     this.app.use('/api', routes);
 
+    // Root endpoint
     this.app.get('/', (req, res) => {
       res.json({
         message: 'Osiedlowo API',

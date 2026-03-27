@@ -11,10 +11,10 @@ export class CreateConversationDto {
 
     @IsArray()
     @ArrayMinSize(1)
-    @IsUUID('all', { each: true })
+    @IsUUID('4', { each: true })
     participantIds: string[];
 
-    @IsUUID('all')
+    @IsUUID()
     @IsOptional()
     neighborhoodId?: string;
 }

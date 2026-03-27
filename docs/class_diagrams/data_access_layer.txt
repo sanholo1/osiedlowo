@@ -1,0 +1,123 @@
+@startuml data_access_layer
+left to right direction
+title Warstwa Dostępu do Danych
+
+package "Data Access Layer" {
+  
+  interface IRepository<T> {
+    + findById(id: Long): T
+    + findAll(): List<T>
+    + save(entity: T): T
+    + update(id: Long, data): T
+    + delete(id: Long): void
+  }
+  
+  class UserRepository {
+    <<Repository>>
+    + findById(id: Long): User
+    + findByEmail(email: String): User
+    + findAll(): List<User>
+    + save(user: User): User
+    + update(id: Long, data): User
+    + delete(id: Long): void
+  }
+  
+  class NeighborhoodRepository {
+    <<Repository>>
+    + findById(id: Long): Neighborhood
+    + findAll(): List<Neighborhood>
+    + save(neighborhood: Neighborhood): Neighborhood
+    + update(id: Long, data): Neighborhood
+    + delete(id: Long): void
+    + findByMemberId(userId: Long): List<Neighborhood>
+  }
+  
+  class AnnouncementRepository {
+    <<Repository>>
+    + findById(id: Long): Announcement
+    + findByNeighborhoodId(neighborhoodId: Long): List<Announcement>
+    + save(announcement: Announcement): Announcement
+    + update(id: Long, data): Announcement
+    + delete(id: Long): void
+    + findByCategory(category: AnnouncementCategory): List<Announcement>
+  }
+  
+  class AssignmentRepository {
+    <<Repository>>
+    + findById(id: Long): Assignment
+    + findByClientId(userId: Long): List<Assignment>
+    + findByContractorId(userId: Long): List<Assignment>
+    + save(assignment: Assignment): Assignment
+    + update(id: Long, data): Assignment
+    + delete(id: Long): void
+  }
+  
+  class ChatRepository {
+    <<Repository>>
+    + findById(id: Long): Chat
+    + findPrivateChat(user1Id: Long, user2Id: Long): Chat
+    + findByNeighborhoodId(neighborhoodId: Long): Chat
+    + save(chat: Chat): Chat
+  }
+  
+  class MessageRepository {
+    <<Repository>>
+    + findById(id: Long): Message
+    + findByChatId(chatId: Long): List<Message>
+    + save(message: Message): Message
+    + delete(id: Long): void
+  }
+  
+  class RatingRepository {
+    <<Repository>>
+    + findById(id: Long): Rating
+    + findByRatedUserId(userId: Long): List<Rating>
+    + findByRatingUserId(userId: Long): List<Rating>
+    + save(rating: Rating): Rating
+  }
+  
+  class MembershipRepository {
+    <<Repository>>
+    + findByUserId(userId: Long): List<Membership>
+    + findByNeighborhoodId(neighborhoodId: Long): List<Membership>
+    + save(membership: Membership): Membership
+    + delete(id: Long): void
+  }
+  
+  IRepository <|.. UserRepository
+  IRepository <|.. NeighborhoodRepository
+  IRepository <|.. AnnouncementRepository
+  IRepository <|.. AssignmentRepository
+  IRepository <|.. ChatRepository
+  IRepository <|.. MessageRepository
+  IRepository <|.. RatingRepository
+  IRepository <|.. MembershipRepository
+  
+  UserRepository ..> User : zarządza
+  NeighborhoodRepository ..> Neighborhood : zarządza
+  AnnouncementRepository ..> Announcement : zarządza
+  AssignmentRepository ..> Assignment : zarządza
+  ChatRepository ..> Chat : zarządza
+  MessageRepository ..> Message : zarządza
+  RatingRepository ..> Rating : zarządza
+  MembershipRepository ..> Membership : zarządza
+}
+
+package "Domain Layer" {
+  class User
+  class Neighborhood
+  class Announcement
+  class Assignment
+  class Chat
+  class Message
+  class Rating
+  class Membership
+}
+
+note right of IRepository
+  Interfejs generyczny
+  dla wszystkich repozytoriów
+  (wzorzec Repository Pattern)
+end note
+
+@enduml

@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { appConfig } from '@config/app.config';
 import { UnauthorizedException } from '@exceptions';
-import { UserRepository } from '@repositories/user.repository';
 
 export interface AuthenticatedRequest extends Request {
   user?: {
@@ -24,19 +23,14 @@ export const authMiddleware = async (
       throw new UnauthorizedException('Token autoryzacji jest wymagany');
     }
 
+    // Weryfikuj token
     const decoded = jwt.verify(token, appConfig.jwt.secret) as {
       userId: string;
       email: string;
       role: string;
     };
 
-    const userRepository = new UserRepository();
-    const user = await userRepository.findById(decoded.userId);
-
-    if (!user) {
-      throw new UnauthorizedException('Użytkownik nie istnieje');
-    }
-
+    // Dołącz użytkownika do żądania
     req.user = {
       userId: decoded.userId,
       email: decoded.email,
@@ -62,6 +56,7 @@ const extractTokenFromHeader = (req: Request): string | null => {
     return null;
   }
 
+  // Format: "Bearer <token>"
   const parts = authHeader.split(' ');
 
   if (parts.length !== 2 || parts[0] !== 'Bearer') {

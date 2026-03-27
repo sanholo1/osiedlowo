@@ -11,7 +11,6 @@ interface AuthContextType {
     login: (data: LoginForm) => Promise<boolean>;
     register: (data: RegisterForm) => Promise<boolean>;
     logout: () => void;
-    updateUser: (userData: Partial<User>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -34,10 +33,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setUser(user);
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));
-            setMessage('auth_login_success');
+            setMessage('Zalogowano pomyślnie!');
             return true;
         } catch (error: any) {
-            setMessage(error.response?.data?.message || 'auth_login_error_general');
+            setMessage(error.response?.data?.message || 'Błąd logowania');
             return false;
         } finally {
             setIsLoading(false);
@@ -48,12 +47,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsLoading(true);
         try {
             await authService.register(data);
-            setMessage('auth_register_success');
+            setMessage('Zarejestrowano pomyślnie! Możesz się teraz zalogować.');
             return true;
         } catch (error: any) {
-            const errorMessage = error.response?.data?.errors
-                ? error.response.data.errors.join(', ')
-                : error.response?.data?.message || 'auth_register_error_general';
+            const errorMessage = error.response?.data?.errors 
+                ? error.response.data.errors.join(', ') 
+                : error.response?.data?.message || 'Błąd rejestracji';
             setMessage(errorMessage);
             return false;
         } finally {
@@ -67,13 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.removeItem('user');
         setToken(null);
         setUser(null);
-        setMessage('auth_logout_success');
-    };
-
-    const updateUser = (userData: Partial<User>) => {
-        const updatedUser = { ...user, ...userData } as User;
-        setUser(updatedUser);
-        localStorage.setItem('user', JSON.stringify(updatedUser));
+        setMessage('Wylogowano');
     };
 
     const value = {
@@ -85,7 +78,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         login,
         register,
         logout,
-        updateUser,
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

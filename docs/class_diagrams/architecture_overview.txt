@@ -1,0 +1,55 @@
+@startuml architecture_overview
+!define RECTANGLE class
+
+title Architektura warstwowa systemu "Sąsiedzkiej Pomocy"
+
+package "Warstwa Prezentacji"  {
+  [React Components]
+  [Pages]
+  [Forms]
+}
+
+package "Warstwa Logiki Biznesowej"  {
+  [Services]
+  [Business Rules]
+}
+
+package "Warstwa Dostępu do Danych"  {
+  [Repositories]
+  [Data Mappers]
+}
+
+package "Warstwa Modelu Domenowego"  {
+  [Entities]
+  [Value Objects]
+  [Enumerations]
+}
+
+package "Warstwa Infrastruktury"  {
+  [Security]
+  [Utilities]
+  [Middleware]
+}
+
+[React Components] --> [Services] : używa
+[Services] --> [Repositories] : używa
+[Repositories] --> [Entities] : zarządza
+[Services] --> [Security] : wykorzystuje
+[Services] --> [Entities] : operuje na
+
+note right of [React Components]
+  Frontend - React
+  Interfejs użytkownika
+end note
+
+note right of [Services]
+  Backend - Node.js
+  Logika biznesowa
+end note
+
+note right of [Repositories]
+  Wzorzec Repository
+  Abstrakcja persystencji
+end note
+
+@enduml
