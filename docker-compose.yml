@@ -2,6 +2,8 @@ services:
   mysql:
     image: mysql:8.0
     container_name: osiedlowo_mysql
+    # Wymuszamy natywne hasła, aby Workbench i starsze biblioteki nie miały problemów z połączeniem
+    command: --default-authentication-plugin=mysql_native_password
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root_password
@@ -9,12 +11,17 @@ services:
       MYSQL_USER: osiedlowo_user
       MYSQL_PASSWORD: osiedlowo_password
     ports:
-      - "3307:3306"
+      - "3307:3306" # Łączysz się przez Workbench na localhost:3307
     volumes:
       - mysql_data:/var/lib/mysql
       - ./database/init:/docker-entrypoint-initdb.d
     networks:
       - osiedlowo_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "--password=root_password"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   backend:
     build:
@@ -34,10 +41,11 @@ services:
     ports:
       - "3001:3001"
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy # Backend czeka, aż baza przejdzie healthcheck
     volumes:
       - ./backend:/app
-      - /app/node_modules
+      - /app/node_modules # Chroni moduły wewnątrz kontenera przed nadpisaniem przez puste foldery z Windowsa
     networks:
       - osiedlowo_network
     command: npm run dev
@@ -56,8 +64,6 @@ services:
       - "3000:3000"
     networks:
       - osiedlowo_network
-
-
 
 volumes:
   mysql_data:
