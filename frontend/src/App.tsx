@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { SettingsProvider } from './contexts/SettingsContext';
 import { useAuth } from './contexts/AuthContext';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
@@ -13,116 +14,176 @@ import { UsersGroupsListPage } from './pages/UsersGroupsListPage';
 import { SearchForGroupPage } from './pages/SearchForGroupPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { GroupPage } from './pages/GroupPage';
+import { DirectMessagesPage } from './pages/DirectMessagesPage';
+import { NotificationsPage } from './pages/NotificationsPage';
+import { AdminPage } from './pages/AdminPage';
 
-// Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isLoggedIn } = useAuth();
   return isLoggedIn ? <>{children}</> : <Navigate to="/login" replace />;
 };
 
-// Public Route Component (redirects to home if already logged in)
 const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isLoggedIn } = useAuth();
-  return !isLoggedIn ? <>{children}</> : <Navigate to="/home" replace />;
+  const { isLoggedIn, user } = useAuth();
+  if (isLoggedIn) {
+    if (user?.role === 'admin') {
+      return <Navigate to="/admin" replace />;
+    }
+    return <Navigate to="/home" replace />;
+  }
+  return <>{children}</>;
+};
+
+const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isLoggedIn, user } = useAuth();
+  if (!isLoggedIn) {
+    return <Navigate to="/login" replace />;
+  }
+  if (user?.role !== 'admin') {
+    return <Navigate to="/home" replace />;
+  }
+  return <>{children}</>;
+};
+
+const UserRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isLoggedIn, user } = useAuth();
+  if (!isLoggedIn) {
+    return <Navigate to="/login" replace />;
+  }
+  if (user?.role === 'admin') {
+    return <Navigate to="/admin" replace />;
+  }
+  return <>{children}</>;
 };
 
 const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          {/* Redirect from root to login */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          
-          {/* Public routes */}
-          <Route
-            path="/login"
-            element={
-              <PublicRoute>
-                <LoginPage />
-              </PublicRoute>
-            }
-          />
-          <Route
-            path="/register"
-            element={
-              <PublicRoute>
-                <RegisterPage />
-              </PublicRoute>
-            }
-          />
-          <Route
-            path="/regulations"
-            element={
-              <PublicRoute>
-                <RegulationsPage />
-              </PublicRoute>
-            }
-          />
-          
-          {/* Protected routes */}
-          <Route
-            path="/home"
-            element={
-              <ProtectedRoute>
-                <HomePage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <ProfilePage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/groupcreating"
-            element={
-              <ProtectedRoute>
-                <GroupCreatingPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/groupslist"
-            element={
-              <ProtectedRoute>
-                <UsersGroupsListPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/search"
-            element={
-              <ProtectedRoute>
-                <SearchForGroupPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/settings"
-            element={
-              <ProtectedRoute>
-                <SettingsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/group"
-            element={
-              <ProtectedRoute>
-                <GroupPage />
-              </ProtectedRoute>
-            }
-          />
+    <SettingsProvider>
+      <AuthProvider>
+        <Router>
+          <Routes>
+            <Route path="/" element={<Navigate to="/login" replace />} />
 
-          {/* Catch all - redirect to login */}
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
-      </Router>
-    </AuthProvider>
+            <Route
+              path="/login"
+              element={
+                <PublicRoute>
+                  <LoginPage />
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/register"
+              element={
+                <PublicRoute>
+                  <RegisterPage />
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/regulations"
+              element={
+                <PublicRoute>
+                  <RegulationsPage />
+                </PublicRoute>
+              }
+            />
+
+            <Route
+              path="/home"
+              element={
+                <UserRoute>
+                  <HomePage />
+                </UserRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <UserRoute>
+                  <ProfilePage />
+                </UserRoute>
+              }
+            />
+            <Route
+              path="/groupcreating"
+              element={
+                <UserRoute>
+                  <GroupCreatingPage />
+                </UserRoute>
+              }
+            />
+            <Route
+              path="/messages"
+              element={
+                <ProtectedRoute>
+                  <DirectMessagesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/direct-messages"
+              element={
+                <ProtectedRoute>
+                  <DirectMessagesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/groupslist"
+              element={
+                <UserRoute>
+                  <UsersGroupsListPage />
+                </UserRoute>
+              }
+            />
+            <Route
+              path="/search"
+              element={
+                <UserRoute>
+                  <SearchForGroupPage />
+                </UserRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <SettingsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/group"
+              element={
+                <UserRoute>
+                  <GroupPage />
+                </UserRoute>
+              }
+            />
+            <Route
+              path="/notifications"
+              element={
+                <UserRoute>
+                  <NotificationsPage />
+                </UserRoute>
+              }
+            />
+
+            <Route
+              path="/admin"
+              element={
+                <AdminRoute>
+                  <AdminPage />
+                </AdminRoute>
+              }
+            />
+
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </Routes>
+        </Router>
+      </AuthProvider>
+    </SettingsProvider>
   );
 };
 

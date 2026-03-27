@@ -14,6 +14,15 @@ export class UpdateUserDto {
   lastName?: string;
 
   @IsOptional()
+  @IsString({ message: 'Adres musi być tekstem' })
+  @MaxLength(200, { message: 'Adres może mieć maksymalnie 200 znaków' })
+  address?: string;
+
+  @IsOptional()
+  @IsString({ each: true, message: 'Każdy atrybut musi być tekstem' })
+  attributes?: string[];
+
+  @IsOptional()
   @IsBoolean()
   isActive?: boolean;
 }

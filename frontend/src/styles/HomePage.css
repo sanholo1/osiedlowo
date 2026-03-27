@@ -5,7 +5,7 @@
     background-color: #f5f7fa;
 }
 
-/* Navbar */
+
 .navbar {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     padding: 16px 32px;
@@ -50,7 +50,7 @@
     color: #667eea;
 }
 
-/* Main Content */
+
 .main-content {
     flex: 1;
     padding: 40px 32px;
@@ -74,7 +74,7 @@
     color: #666;
 }
 
-/* Cards Grid */
+
 .cards-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -115,7 +115,7 @@
 }
 
 .card-content p {
-    color: #666;
+    color: var(--white-blue);
     line-height: 1.6;
     margin: 4px 0;
 }
@@ -142,7 +142,7 @@
     transform: translateY(-2px);
 }
 
-/* Footer */
+
 .footer {
     background-color: white;
     padding: 20px;
@@ -157,7 +157,12 @@
     font-size: 0.9rem;
 }
 
-/* Responsive Design */
+main>* {
+    background: #020024;
+    background: linear-gradient(90deg,rgba(2, 0, 36, 1) 0%, rgba(9, 9, 121, 1) 63%, rgba(37, 37, 194, 1) 100%);
+}
+
+
 @media (max-width: 768px) {
     .navbar {
         padding: 12px 20px;

@@ -13,6 +13,11 @@ export interface User {
     email: string;
     firstName: string;
     lastName: string;
+    address?: string;
+    attributes?: string[];
+    averageRating?: number;
+    totalRatings?: number;
+    role?: string;
 }
 
 export interface AuthResponse {

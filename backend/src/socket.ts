@@ -19,7 +19,6 @@ export const initializeSocket = (httpServer: HTTPServer): SocketIOServer => {
 
     const chatService = new ChatService();
 
-    // Authentication middleware
     io.use((socket: AuthenticatedSocket, next) => {
         try {
             const token = socket.handshake.auth.token || socket.handshake.headers.authorization?.replace('Bearer ', '');
@@ -38,17 +37,14 @@ export const initializeSocket = (httpServer: HTTPServer): SocketIOServer => {
 
     io.on('connection', (socket: AuthenticatedSocket) => {
         const userId = socket.userId!;
-        console.log(`✅ User connected: ${userId}`);
 
-        // Join user to their personal room
+
         socket.join(`user:${userId}`);
 
-        // Join conversation
         socket.on('join_conversation', async (data: { conversationId: string }) => {
             try {
                 const { conversationId } = data;
 
-                // Verify user is participant
                 const isParticipant = await chatService['conversationRepository'].isParticipant(conversationId, userId);
                 if (!isParticipant) {
                     socket.emit('error', { message: 'Nie masz dostępu do tej konwersacji' });
@@ -56,7 +52,7 @@ export const initializeSocket = (httpServer: HTTPServer): SocketIOServer => {
                 }
 
                 socket.join(`conversation:${conversationId}`);
-                console.log(`User ${userId} joined conversation ${conversationId}`);
+
 
                 socket.emit('joined_conversation', { conversationId });
             } catch (error) {
@@ -65,7 +61,6 @@ export const initializeSocket = (httpServer: HTTPServer): SocketIOServer => {
             }
         });
 
-        // Send message
         socket.on('send_message', async (data: { conversationId: string; content: string }) => {
             try {
                 const { conversationId, content } = data;
@@ -82,7 +77,6 @@ export const initializeSocket = (httpServer: HTTPServer): SocketIOServer => {
 
                 const message = await chatService.sendMessage(conversationId, userId, content);
 
-                // Emit to all participants in the conversation
                 io.to(`conversation:${conversationId}`).emit('new_message', {
                     id: message.id,
                     conversationId: message.conversationId,
@@ -94,14 +88,13 @@ export const initializeSocket = (httpServer: HTTPServer): SocketIOServer => {
                     updatedAt: message.updatedAt,
                 });
 
-                console.log(`Message sent in conversation ${conversationId} by user ${userId}`);
+
             } catch (error: any) {
                 console.error('Error sending message:', error);
                 socket.emit('error', { message: error.message || 'Błąd wysyłania wiadomości' });
             }
         });
 
-        // Typing indicator
         socket.on('typing', (data: { conversationId: string; isTyping: boolean }) => {
             try {
                 const { conversationId, isTyping } = data;
@@ -116,7 +109,6 @@ export const initializeSocket = (httpServer: HTTPServer): SocketIOServer => {
             }
         });
 
-        // Mark messages as read
         socket.on('mark_read', async (data: { conversationId: string }) => {
             try {
                 const { conversationId } = data;
@@ -132,13 +124,35 @@ export const initializeSocket = (httpServer: HTTPServer): SocketIOServer => {
             }
         });
 
-        // Disconnect
+        socket.on('delete_message', async (data: { messageId: string }) => {
+            try {
+                const { messageId } = data;
+
+                const token = socket.handshake.auth.token || socket.handshake.headers.authorization?.replace('Bearer ', '');
+                const decoded = jwt.verify(token, appConfig.jwt.secret) as any;
+                const userRole = decoded.role || 'user';
+
+                const result = await chatService.deleteMessage(messageId, userId, userRole);
+
+                io.to(`conversation:${result.conversationId}`).emit('message_deleted', {
+                    messageId,
+                    conversationId: result.conversationId,
+                    deletedBy: userId,
+                });
+
+
+            } catch (error: any) {
+                console.error('Error deleting message:', error);
+                socket.emit('error', { message: error.message || 'Błąd usuwania wiadomości' });
+            }
+        });
+
         socket.on('disconnect', () => {
-            console.log(`❌ User disconnected: ${userId}`);
+
         });
     });
 
-    console.log('⚡ Socket.io initialized');
+
 
     return io;
 };

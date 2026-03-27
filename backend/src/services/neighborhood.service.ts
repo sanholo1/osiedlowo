@@ -2,6 +2,7 @@ import { NeighborhoodRepository } from '../repositories/neighborhood.repository'
 import { ConversationRepository } from '../repositories/conversation.repository';
 import { Neighborhood } from '../entities/neighborhood.entity';
 import { ConversationType } from '../entities/conversation.entity';
+import * as bcrypt from 'bcrypt';
 
 export class NeighborhoodService {
     private neighborhoodRepository: NeighborhoodRepository;
@@ -24,18 +25,47 @@ export class NeighborhoodService {
         return this.neighborhoodRepository.search(query, userId);
     }
 
+    async getPublicNeighborhoods(userId?: string): Promise<Neighborhood[]> {
+        return this.neighborhoodRepository.findPublic(userId);
+    }
+
     async getNeighborhoodById(id: string): Promise<Neighborhood | null> {
         return this.neighborhoodRepository.findById(id);
     }
 
-    async createNeighborhood(data: { name: string; city: string; adminId: string }): Promise<Neighborhood> {
-        // Utwórz sąsiedztwo
-        const neighborhood = await this.neighborhoodRepository.create(data);
+    async createNeighborhood(data: {
+        name: string;
+        city: string;
+        adminId: string;
+        isPrivate?: boolean;
+        password?: string;
+    }): Promise<Neighborhood> {
+        const existingNeighborhood = await this.neighborhoodRepository.findByName(data.name);
+        if (existingNeighborhood) {
+            throw new Error('Osiedle o tej nazwie już istnieje');
+        }
 
-        // Dodaj admina jako członka
+        let hashedPassword: string | undefined;
+        let inviteCode: string | undefined;
+
+        if (data.isPrivate) {
+            if (data.password) {
+                hashedPassword = await bcrypt.hash(data.password, 10);
+            }
+            inviteCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        }
+
+        const neighborhood = await this.neighborhoodRepository.create({
+            name: data.name,
+            city: data.city,
+            adminId: data.adminId,
+            isPrivate: data.isPrivate || false,
+            password: hashedPassword,
+            inviteCode: inviteCode
+        });
+
         await this.neighborhoodRepository.addMember(neighborhood.id, data.adminId);
 
-        // Utwórz grupową konwersację dla sąsiedztwa
         await this.conversationRepository.create({
             type: ConversationType.GROUP,
             name: neighborhood.name,
@@ -46,16 +76,56 @@ export class NeighborhoodService {
         return this.neighborhoodRepository.findById(neighborhood.id) as Promise<Neighborhood>;
     }
 
-    async joinNeighborhood(neighborhoodId: string, userId: string): Promise<void> {
+    async joinNeighborhood(neighborhoodId: string, userId: string, password?: string, userRole?: string): Promise<void> {
+        const neighborhood = await this.neighborhoodRepository.findById(neighborhoodId);
+        if (!neighborhood) {
+            throw new Error('Sąsiedztwo nie istnieje');
+        }
+
+        const isSystemAdmin = userRole === 'admin';
+
+        if (neighborhood.isPrivate && !isSystemAdmin) {
+            if (!password) {
+                throw new Error('To osiedle jest prywatne. Wymagane jest hasło.');
+            }
+
+            const isPasswordValid = await bcrypt.compare(password, neighborhood.password);
+            if (!isPasswordValid) {
+                throw new Error('Nieprawidłowe hasło');
+            }
+        }
+
+        await this.addMemberToNeighborhood(neighborhoodId, userId);
+    }
+
+    async joinByInviteCode(inviteCode: string, userId: string, password?: string): Promise<void> {
+        const neighborhood = await this.neighborhoodRepository.findByInviteCode(inviteCode);
+        if (!neighborhood) {
+            throw new Error('Nieprawidłowy kod zaproszenia');
+        }
+
+        if (neighborhood.isPrivate && neighborhood.password) {
+            if (!password) {
+                throw new Error('Wymagane hasło');
+            }
+
+            const isPasswordValid = await bcrypt.compare(password, neighborhood.password);
+            if (!isPasswordValid) {
+                throw new Error('Nieprawidłowe hasło');
+            }
+        }
+
+        await this.addMemberToNeighborhood(neighborhood.id, userId);
+    }
+
+    private async addMemberToNeighborhood(neighborhoodId: string, userId: string): Promise<void> {
         const isMember = await this.neighborhoodRepository.isMember(neighborhoodId, userId);
         if (isMember) {
             throw new Error('Już jesteś członkiem tego sąsiedztwa');
         }
 
-        // Dodaj użytkownika do sąsiedztwa
         await this.neighborhoodRepository.addMember(neighborhoodId, userId);
 
-        // Znajdź konwersację grupową sąsiedztwa i dodaj użytkownika
         const conversation = await this.conversationRepository.findByNeighborhoodId(neighborhoodId);
         if (conversation) {
             await this.conversationRepository.addParticipant(conversation.id, userId);
@@ -77,33 +147,107 @@ export class NeighborhoodService {
             throw new Error('Nie jesteś członkiem tego sąsiedztwa');
         }
 
-        // Usuń użytkownika z sąsiedztwa
         await this.neighborhoodRepository.removeMember(neighborhoodId, userId);
 
-        // Usuń użytkownika z konwersacji grupowej
         const conversation = await this.conversationRepository.findByNeighborhoodId(neighborhoodId);
         if (conversation) {
             await this.conversationRepository.removeParticipant(conversation.id, userId);
         }
     }
 
-    async deleteNeighborhood(neighborhoodId: string, userId: string): Promise<void> {
+    async removeMember(neighborhoodId: string, adminId: string, memberId: string, userRole?: string): Promise<void> {
+        const neighborhood = await this.neighborhoodRepository.findById(neighborhoodId);
+        if (!neighborhood) {
+            throw new Error('Sąsiedztwo nie istnieje');
+        }
+
+        const isSystemAdmin = userRole === 'admin';
+
+        if (neighborhood.adminId !== adminId && !isSystemAdmin) {
+            throw new Error('Tylko administrator osiedla może usuwać członków');
+        }
+
+        if (neighborhood.adminId === memberId) {
+            throw new Error('Administrator nie może usunąć samego siebie');
+        }
+
+        const isMember = await this.neighborhoodRepository.isMember(neighborhoodId, memberId);
+        if (!isMember) {
+            throw new Error('Użytkownik nie jest członkiem tego sąsiedztwa');
+        }
+
+        await this.neighborhoodRepository.removeMember(neighborhoodId, memberId);
+
+        const conversation = await this.conversationRepository.findByNeighborhoodId(neighborhoodId);
+        if (conversation) {
+            await this.conversationRepository.removeParticipant(conversation.id, memberId);
+        }
+    }
+
+    async updatePassword(neighborhoodId: string, userId: string, newPassword: string): Promise<void> {
         const neighborhood = await this.neighborhoodRepository.findById(neighborhoodId);
         if (!neighborhood) {
             throw new Error('Sąsiedztwo nie istnieje');
         }
 
         if (neighborhood.adminId !== userId) {
+            throw new Error('Tylko administrator może zmienić hasło');
+        }
+
+        if (!neighborhood.isPrivate) {
+            throw new Error('Można zmienić hasło tylko dla prywatnego osiedla');
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        await this.neighborhoodRepository.update(neighborhoodId, { password: hashedPassword });
+    }
+
+    async deleteNeighborhood(neighborhoodId: string, userId: string, userRole?: string): Promise<void> {
+        const neighborhood = await this.neighborhoodRepository.findById(neighborhoodId);
+        if (!neighborhood) {
+            throw new Error('Sąsiedztwo nie istnieje');
+        }
+
+        const isSystemAdmin = userRole === 'admin';
+
+        if (neighborhood.adminId !== userId && !isSystemAdmin) {
             throw new Error('Tylko administrator może usunąć sąsiedztwo');
         }
 
-        // Znajdź i usuń konwersację grupową
         const conversation = await this.conversationRepository.findByNeighborhoodId(neighborhoodId);
         if (conversation) {
             await this.conversationRepository.delete(conversation.id);
         }
 
-        // Usuń sąsiedztwo
         await this.neighborhoodRepository.delete(neighborhoodId);
+    }
+    async removeMemberAsAdmin(neighborhoodId: string, userId: string): Promise<void> {
+        const neighborhood = await this.neighborhoodRepository.findById(neighborhoodId);
+        if (!neighborhood) {
+            throw new Error('Sąsiedztwo nie istnieje');
+        }
+
+        const isMember = await this.neighborhoodRepository.isMember(neighborhoodId, userId);
+        if (!isMember) {
+            throw new Error('Użytkownik nie jest członkiem tego sąsiedztwa');
+        }
+
+        await this.neighborhoodRepository.removeMember(neighborhoodId, userId);
+
+        const conversation = await this.conversationRepository.findByNeighborhoodId(neighborhoodId);
+        if (conversation) {
+            await this.conversationRepository.removeParticipant(conversation.id, userId);
+        }
+    }
+
+    async updateNeighborhoodAsAdmin(id: string, data: Partial<Neighborhood>): Promise<Neighborhood> {
+        const neighborhood = await this.neighborhoodRepository.findById(id);
+        if (!neighborhood) {
+            throw new Error('Sąsiedztwo nie istnieje');
+        }
+
+        await this.neighborhoodRepository.update(id, data);
+        return this.neighborhoodRepository.findById(id) as Promise<Neighborhood>;
     }
 }
